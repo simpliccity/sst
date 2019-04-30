@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2013 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.simpliccity.org/schema/sst" 
+		xmlns:tns="http://www.simpliccity.org/schema/sst" 
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd" />
+	
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+			Defines configuration elements for the core Simple Spring Toolkit (SST).
+			Provides configuration shortcuts for the various frameworks supported
+			by sst-core.
+		]]></xsd:documentation>
+	</xsd:annotation>
+	
+	<xsd:element name="transformer">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+				Configures a singleton instance of a Transformer bean, which serves as the controller for
+				the SST Transformation framework.  The created bean will be named "sstTransformer" and
+				can be injected directly or through autowiring.  All supporting beans required for
+				the Transformation framework to function are created with default values (unless otherwise
+				specified through attributes of this element).
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.simpliccity.sst.transform.Transformer"/>
+					<tool:exports type="org.simpliccity.sst.bean.lookup.BeanMetadataLookupManager"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+   		<xsd:complexType>
+	 		<xsd:attribute name="disableCache" type="xsd:boolean" default="false">
+	 			<xsd:annotation>
+	 				<xsd:documentation><![CDATA[
+	 					Specifies whether to globally disable object caching for the Transformer bean.
+	 					Default is "false".
+	 				]]></xsd:documentation>
+	 			</xsd:annotation>
+	 		</xsd:attribute>
+			<xsd:attribute name="defaultCacheMode" default="NONE">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+						Specifies the default object caching mode to use for the Transformer bean.  
+						The default mode applies for all transformations that do not specifically define a caching mode.
+							 
+						The available values are:
+						"NONE" indicates the transformation does not participate in caching, either in retrieving or setting the value from/to the cache;
+						"JOIN" indicates the transformation uses the existing cache context, retrieving or setting the value from/to the cache;
+						"FLUSH" indicates the transformation uses the existing cache context but flushes it upon completion.
+							
+						To maintain backward compatibility with versions of the Transformer that did not support caching, the default
+						value is "NONE".						
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="NONE"/>
+						<xsd:enumeration value="JOIN"/>
+						<xsd:enumeration value="FLUSH"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="globalCacheScope" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+						Specifies whether the Transformer bean uses a single global cache or a dedicated cache per thread
+						for object caching.  A global cache optimizes the effectiveness of the cache, while the use of thread-local
+						caching provides a level of isolation to ensure thread safety and transformation accuracy.  Set to "true" to 
+						use  a single global cache or "false" to employ a thread-local cache.  Defaults to "false".						
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="cacheFactory" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+						Specifies a reference to a TransformationCacheFactory bean that the Transformer bean uses to generate TransformationCache
+						instance(s) to support object caching.  If none is specified, an instance of DefaultTransformationCacheFactory is used.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="org.simpliccity.sst.transform.cache.TransformationCacheFactory" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="surfaceExceptions" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+						Specifies whether exceptions thrown when invoking methods on a transformation bean should
+						be rethrown.  Set to "true" if exceptions should be rethrown or "false" if not.  Defaults
+						to "false".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>	
+   		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="lookup">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+				Configures a singleton instance of a BeanMetadataLookupManager bean, which serves as the controller for
+				the SST Bean Metadata Lookup framework.  The created bean will be named "sstBeanMetadataLookupManager" and
+				can be injected directly or through autowiring.  All supporting beans required for
+				the Bean Metadata Lookup framework to function are created with default values (unless otherwise
+				specified through attributes of this element).
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.simpliccity.sst.bean.lookup.BeanMetadataLookupManager"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+  		<xsd:complexType>
+			<xsd:attribute name="strategy" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+						Specifies a reference to a BeanMetadataLookupStrategy bean that the BeanMetadataLookupManager bean
+						uses as its strategy to lookup beans from the application context by metadata.  If none is specified, 
+						an instance of MappedNameBeanMetadataLookupStrategy is used.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="org.simpliccity.sst.bean.lookup.namespace.MappedNameBeanMetadataLookupStrategy" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+   		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="property">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+				Configures DelegatingPropertiesFactoryBean and DelegatingPropertyPlaceholderConfigurer beans to enable the
+				SST Property framework.  These address replacing property placeholders in @Value annotations and bean configuration
+				files, respectively.  This element can be used in place of the "context:property-override" and "context:property-placeholder"
+				elements when using the Property framework in place of Spring's Unified Property Management.  Check the Property
+				framework documentation to understand the impact of using this in place of the standard Spring support.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.simpliccity.sst.property.DelegatingPropertiesFactoryBean" />
+					<tool:exports type="org.simpliccity.sst.property.DelegatingPropertyPlaceholderConfigurer" />
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="loader" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+						Specifies a reference to a fully-configured PropertyLoader bean used to load the property values available for placeholder replacement.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="org.simpliccity.sst.property.PropertyLoader" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

@@ -1,0 +1,135 @@
+ -----
+ ${displayTitle} Bean Naming Framework
+ -----
+ Kevin Fox
+ -----
+ 2013-07-29
+ -----
+
+ ~~    Copyright 2013 Information Control Corporation
+ ~~
+ ~~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~~ you may not use this file except in compliance with the License.
+ ~~ You may obtain a copy of the License at
+ ~~
+ ~~     http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing, software
+ ~~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~~ See the License for the specific language governing permissions and
+ ~~ limitations under the License.
+
+ ~~ NOTE: For help with the syntax of this file, see:
+ ~~ http://maven.apache.org/doxia/references/apt-format.html
+
+${displayTitle} Bean Naming Framework
+
+  While Spring applications, in general, have no particular need to worry about what or how beans are named, frameworks can benefit greatly from being able
+  to specify the names that the beans under their control will be given.  By enforcing a predetermined naming convention, a framework can ensure its ability
+  to find beans in a generic fashion when needed.
+  
+  Rather than relying on developers to correctly name their components, the <<Bean Naming Framework>> provides a mechanism other frameworks can use to
+  derive unique, identifiable names from the metadata specified in the annotations used to mark component candidates.  It does so by extending Spring's
+  support for annotation bean name generation, adding the capability to define an individual namespace per annotation.  The following sections describe
+  how to apply the <<Bean Naming Framework>> to a new custom framework.
+  
+  Developers who are thinking of using the <<Bean Naming Framework>> in a custom framework should also consider using the {{{./metadata_lookup.html}Bean Metadata Lookup Framework}}
+  to abstract away from a dependence on bean names in their code.
+
+%{toc|section=1|fromDepth=2|toDepth=3}
+  
+* Setup annotation scanning
+
+  Add the following entry (or its equivalent) in the application context configuration
+  
+  \[text:ComplexTransformationCacheJoinIT.xml:xml! scanConfig \]
+ 
+  <Be sure to add the necessary application package(s) in the> <<<base-package>>> <attribute (the list is comma-separated) so that the components can be
+  found.>
+  
+  The bean name generator specified is part of the <<Bean Naming Framework>>.  It is responsible for determining the annotation by which a component was
+  recognized and delegating the naming of that bean to a corresponding name generator.  If none is found, the Spring default naming approach is used.
+  
+* Define a custom annotation
+
+  By default, Spring component scanning recognizes classes that are marked with the <<<@Component>>>, <<<@Repository>>>, <<<@Service>>> and <<<@Controller>>>
+  annotations.  It can also be extended to recognize custom annotations in one of two ways:
+  
+  * Annotate the custom annotation with <<<@Component>>>
+  
+   \[jc:org.simpliccity.sst.transform.annotation.Transformation:--- UserGuide customAnnotation ---; highlight -ughighlight-\]
+    
+  * Apply a filter to the <<<context:component-scan>>> element to include the desired annotation
+  
+  []  
+  
+  In either case, the annotation should define elements whose values, in combination, uniquely identify a corresponding bean.
+  
+* Create a bean name generator for the annotation
+
+  The <<Bean Naming Framework>> can delegate the job of naming classes marked with the custom annotation to any class that implements the Spring <<<BeanNameGenerator>>>.
+  interface.  However, the framework provides several abstract base classes that simplify the process of creating a custom name generator.  The following sections
+  describe how to implement one based on <<<AbstractAnnotationNamespaceBeanNameGenerator>>>, which allows beans to be named using a standard namespace pattern definition.
+  See the {{{../../apidocs/org/simpliccity/sst/bean/namespace/AbstractAnnotationNamespaceBeanNameGenerator.html}AbstractAnnotationNamespaceBeanNameGenerator javadoc}}
+  for more details.
+  
+** Extend <<<AbstractAnnotationNamespaceBeanNameGenerator>>>
+
+  Create a class that extends <<<AbstractAnnotationNamespaceBeanNameGenerator>>>.
+  
+** Implement the <<<getNamespaceNamePattern()>>> method
+
+  The base class uses the Java <<<MessageFormat>>> class to generate the bean name from a naming pattern.  Numbered placeholders within the pattern ({0}, {1}, etc.) are
+  replaced by name components extracted from the annotation metadata on the bean to be named.  Not only does this ensure that all beans marked with the custom
+  annotation are named in a consistent way, but, if the pattern is distinct enough, it groups the beans so named into a disjoint namespace within the application context.
+  
+  The custom bean name generator defines the desired naming pattern by implementing the <<<getNamespaceNamePattern()>>> method.  Note that the values to be substituted
+  into the pattern when generating the name will be provided by the <<<getNameComponentsFromAnnotationMetadata()>>> method (see below).  The pattern should take into
+  account the number and order of the values returned by this method. 
+  
+  \[jc:org.simpliccity.sst.transform.annotation.TransformationAnnotationBeanNameGenerator:--- UserGuide namePattern ---\]
+
+** Implement the <<<getAnnotationClassName()>>> method
+
+  The base class checks to ensure that this bean name generator can correctly handle the bean definition it has been given.  The check consists of two parts: first that the
+  bean has been annotated with the expected class and second that any more specific validations (perhaps based on the values specified for the annotation) have passed.  In order
+  for the base class to carry out the first of these checks, the custom bean name generator class must implement the <<<getAnnotationClassName()>>> method to return the fully-qualified
+  class name of the supported annotation.
+  
+  \[jc:org.simpliccity.sst.transform.annotation.TransformationAnnotationBeanNameGenerator:--- UserGuide annotationClass ---\]
+  
+** Override the <<<isSupported()>>> method (<optional>)
+
+  As mentioned, a custom bean name generator can define validations to apply to a bean definition before it will generate a name.  This can be used to ensure that the corresponding
+  annotation from which the name will be derived incorporates valid metadata about the bean.  These validations are defined in the <<<isSupported()>>> method.  The base class includes
+  an unrestrictive implementation of this method that always returns <<<true>>>.  Custom bean name generators can override this method to implement more stringent checks, if needed.
+
+  \[jc:org.simpliccity.sst.transform.annotation.TransformationAnnotationBeanNameGenerator:--- UserGuide isSupported ---\]
+  
+** Implement the <<<getNameComponentsFromAnnotationMetadata()>>> method
+
+  The bulk of the work for the custom bean name generator is to determine the values that will be substituted for the placeholders in the name pattern.  These are generally
+  extracted from the settings of the corresponding custom annotation on the bean definition.  Implement the <<<getNameComponentsFromAnnotationMetadata()>>> method to return
+  the appropriate list of values.
+  
+  \[jc:org.simpliccity.sst.transform.annotation.TransformationAnnotationBeanNameGenerator:--- UserGuide nameComponents ---\]
+  
+  Note that this example makes use of capabilities provided by the {{{./metadata_lookup.html}Bean Metadata Lookup Framework}}.  If the name generator will be used in conjunction
+  with this framework, it should extend <<<AbstractLookupAnnotationNamespaceBeanNameGenerator>>> instead of <<<AbstractAnnotationNamespaceBeanNameGenerator>>>.
+  
+* Create (or add to) a <<<META-INF/sst.annotation.handlers>>> file
+
+  The <<<PropertiesDelegateAnnotationBeanNameGenerator>>> bean name generator configured for component scanning (see {{Setup annotation scanning}}) matches custom component
+  annotations to corresponding custom bean name generators.  The information needed to perform this matching is compiled from files named <<<sst.annotation.handlers>>> located
+  in the <<<META-INF>>> folder in one or more JAR files on the classpath.  This approach allows each framework to define its own annotation name generation configuration without
+  interfering with any other framework.
+  
+  The <<<sst.annotation.handlers>>> file is a standard Java properties file.  Each such file can contain multiple properties having the fully-qualified class name of a custom
+  annotation as a key and the fully-qualified class name of the corresponding bean name generator as  the value.  Be sure to add the newly-created annotation/name generator pair
+  to the <<<sst.annotation.handlers>>> file in the appropriate project.
+  
+  
+   
+  
+  

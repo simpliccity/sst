@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.simpliccity.org/schema/sstweb" 
+		xmlns:tns="http://www.simpliccity.org/schema/sstweb" 
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd" />
+
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+			Defines configuration elements for the Simple Spring Toolkit (SST) web services support.
+			Provides configuration shortcuts for the various frameworks supported by sst-ws.
+		]]></xsd:documentation>
+	</xsd:annotation>
+	
+	<xsd:element name="access" >
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+				Configures a singleton instance of an ServiceAccessControlHandlerInterceptor bean, which enables support
+				for the SST MVC Access Control framework, with the specified "id".  This bean must be referenced
+				as an HandlerInterceptor in a Spring MVC configuration in order for access control constraints
+				to apply.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.simpliccity.sst.web.security.ServiceAccessControlHandlerInterceptor" />
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:attribute name="securityHandlerRef" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+								Specifies a reference to an ServiceSecurityHandler bean that enables interaction with the
+								underlying security system used by the runtime environment.  If none is specified, an
+								instance of SpringSecurityServiceSecurityHandler is used.
+							]]></xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation>
+									<tool:expected-type type="org.simpliccity.sst.service.security.ServiceSecurityHandler" />
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+	 
+</xsd:schema>

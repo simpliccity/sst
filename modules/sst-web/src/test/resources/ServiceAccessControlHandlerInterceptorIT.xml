@@ -1,0 +1,96 @@
+<!--
+
+    Copyright 2013 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<!-- customNamespace -->
+<beans xmlns="http://www.springframework.org/schema/beans" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:security="http://www.springframework.org/schema/security"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:sst="http://www.simpliccity.org/schema/sst"
+		xmlns:sstweb="http://www.simpliccity.org/schema/sstweb"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+			http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+			http://www.simpliccity.org/schema/sst http://www.simpliccity.org/schema/sst/sst.xsd
+			http://www.simpliccity.org/schema/sstweb http://www.simpliccity.org/schema/sst/sstweb.xsd">
+<!-- customNamespace -->
+
+<!-- scanConfig -->
+	<context:annotation-config />
+	<context:component-scan base-package="org.simpliccity.sst" name-generator="org.simpliccity.sst.bean.annotation.PropertiesDelegateAnnotationBeanNameGenerator" />
+<!-- scanConfig -->
+
+<!-- metadataLookupConfig -->
+
+	<sst:lookup />
+	
+<!-- metadataLookupConfig -->
+
+<!-- mvcConfig -->
+
+	<mvc:annotation-driven />
+
+	<bean name="viewResolver" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+	
+	<mvc:interceptors>
+		<ref bean="serviceAccessControlInterceptor" />
+	</mvc:interceptors>
+
+<!-- mvcConfig -->
+	
+	<!-- Interceptors  -->
+	
+	<!-- accessInterceptor -->
+
+	<sstweb:access id="serviceAccessControlInterceptor" securityHandlerRef="serviceSecurityHandler"/>
+	
+	<!-- Test service security handler setup -->
+	
+	<bean id="jwtKeyManager" class="org.simpliccity.sst.jwt.key.KeyManager" />
+	
+	<bean id="jwtTokenBuilder" class="org.simpliccity.sst.jwt.jjwt.JjwtSignedJwtTokenBuilder">
+		<property name="keyManager" ref="jwtKeyManager" />
+	</bean>
+	
+	<bean id="jwtTokenReader" class="org.simpliccity.sst.jwt.jjwt.JjwtSignedJwtTokenReader">
+		<property name="keyManager" ref="jwtKeyManager" />
+		<property name="knownIssuers">
+			<map>
+				<entry key="SST">
+					<bean class="org.simpliccity.sst.jwt.IssuerConfig">
+						<constructor-arg name="issuer" value="SST" />
+						<constructor-arg name="keyAlias" value="SST" />
+						<constructor-arg name="signingAlgorithm" value="HS512" />
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="xauthTokenHandler" class="org.simpliccity.sst.web.security.token.XAuthHeaderTokenHandler" />
+	
+	<bean id="serviceSecurityHandler" class="org.simpliccity.sst.web.security.TestJwtTokenServiceSecurityHandler">
+		<property name="jwtTokenReader" ref="jwtTokenReader" />
+		<property name="tokenHandler" ref="xauthTokenHandler" />
+	</bean>
+	
+</beans>
+			

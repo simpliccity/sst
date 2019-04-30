@@ -1,0 +1,205 @@
+ -----
+ ${displayTitle} Bean Metadata Lookup Framework
+ -----
+ Kevin Fox
+ -----
+ 2013-12-11
+ -----
+
+ ~~    Copyright 2013 Information Control Corporation
+ ~~
+ ~~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~~ you may not use this file except in compliance with the License.
+ ~~ You may obtain a copy of the License at
+ ~~
+ ~~     http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing, software
+ ~~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~~ See the License for the specific language governing permissions and
+ ~~ limitations under the License.
+
+ ~~ NOTE: For help with the syntax of this file, see:
+ ~~ http://maven.apache.org/doxia/references/apt-format.html
+
+${displayTitle} Bean Metadata Lookup Framework
+
+  Most applications that rely on Spring for dependency injection can get by using beans that are wired statically at application startup.  Common use cases include employing either XML configuration
+  or the <<<@Autowired>>> annotation to define the necessary relationships between beans.  The Spring bean container provides sophisticated facilities, including support for Convention Over
+  Configuration and mechanisms such as qualifiers, to ensure that the correct beans are wired up together.
+  
+  Frameworks, on the other hand, often must dynamically select the appropriate bean for a particular purpose.  This frequently boils down to the need to correlate some identifying metadata to a 
+  particular bean instance.  For example, Spring MVC uses a combination of <<<RequestToViewNameTranslator>>> and <<<ViewResolver>>> to define a mapping between a URI and the corresponding view bean 
+  needed to render the view output.  However, Spring itself does not provide a <generic> mechanism to allow a framework to programmatically retrieve a bean based on associated metadata.
+  
+  The <<Bean Metadata Lookup Framework>> is designed to fill this gap.  It provides a simple, extensible lookup mechanism layered on top of the application context.  Framework developers can easily 
+  leverage the <<Bean Metadata Lookup Framework>> to create a custom mapping between metadata attributes and corresponding beans.  The following sections provide the information necessary to
+  incorporate it into a custom framework.
+  
+  Note that, as of this release, the <<Bean Metadata Lookup Framework>> can only be used to lookup beans that are configured through component autodetection (i.e. annotation scanning).  This
+  restriction may be lifted in a future release.
+
+%{toc|section=1|fromDepth=2|toDepth=3}
+  
+* Configuring the Metadata Lookup Framework
+
+  The {{Basic Configuration}} steps describe how to use the "out of the box" configuration for the <<Bean Metadata Lookup Framework>>.  This should be sufficient for most applications.  However, if 
+  you need more control over how the framework works under the covers, see {{Advanced Configuration}}.
+  
+  By default, this framework makes use of the {{{./bean_name.html}SST Bean Naming Framework}} to encode the metadata which identifies a bean into the bean's name.  The steps described below
+  address all necessary configuration to employ the <<Bean Naming Framework>> for this purpose.
+  
+** Basic Configuration
+
+  <<SST>> provides a custom XML namespace that can be used to configure the <<Bean Metadata Lookup Framework>> for use in an application.  Follow these steps to enable the framework.
+
+  [[1]] To use the custom namespace in an application context configuration file, first add the namespace definition to the <<<\<beans\>>>> tag at the top of the file:
+  
+    \[text:BeanMetadataLookupManagerIT.xml:xml! customNamespace \]
+ 
+    Notice, the definition of the <<sst>> namespace and the corresponding entry in the <<<schemaLocation>>>.  The XSD file for the namespace is bundled in the
+    <<<sst-core>>> JAR file, along with the rest of the <<Bean Metadata Lookup Framework>>, so this must be included on the application classpath.
+  
+  [[2]] The framework identifies candidate beans through Spring's component autodetection.  Use the following two lines to configure it:
+  
+    \[text:BeanMetadataLookupManagerIT.xml:xml! scanConfig \]
+ 
+    <Be sure to add the necessary application package(s) in the> <<<base-package>>> <attribute (the list is comma-separated) so that the annotated beans can be
+    found.>
+  
+  [[3]] Finally, to configure the <<<BeanMetadataLookupManager>>> bean, add the following line:
+
+    \[text:BeanMetadataLookupManagerIT.xml:xml! metadataLookupConfig \]
+    
+    Note that use of the <<<\<sst:transformer\>>>> tag to configure the {{{./transform.html}SST Transformation Framework}} also implicitly defines the <<<BeanMetadataLookupManager>>> bean.
+
+  []
+  
+** Advanced Configuration
+
+  The <<<\<sst:lookup\>>>> tag supports a <<<strategy>>> attribute that can be used to configure a custom implementation of the <<<BeanMetadataLookupStrategy>>> interface for the
+  <<<BeanMetadataLookupManager>>> bean.  See {{Implementing a Custom Metadata Lookup Strategy}} for further information.
+  
+  The <<<BeanMetadataLookupManager>>> bean defined by the <<<\<sst:lookup\>>>> tag is named <sstBeanMetadataLookupManager>.  Another bean named <sstBeanMetadataLookupStrategy> is
+  also defined, by default.  Be sure not to define any beans that use these names.
+  
+  If for some reason you prefer to directly configure the <<<BeanMetadataLookupManager>>> bean, rather than relying on the custom namespace, see the
+  {{{../../apidocs/org/simpliccity/sst/bean/lookup/BeanMetadataLookupManager.html}BeanMetadataLookupManager javadoc}} for information on the configurable properties.
+
+* Associating metadata with beans
+
+  The basic idea of the <<Bean Metadata Lookup Framework>> is that a participating bean can be uniquely identified (and retrieved from the application context) using a set of
+  metadata attributes.  The framework, itself, does not assume any particular means of associating metadata attributes with beans.  However, the out-of-the-box implementation, as 
+  enabled by the {{Basic Configuration}}, relies on Java annotations both to define beans and to associate the corresponding metadata.  This is done using a combination of Spring 
+  component autodetection and the {{{./bean_name.html}SST Bean Naming Framework}}.
+ 
+  Although a developer is free to associate any desired attributes with a bean, it is generally helpful to define a common set for all beans of a similar purpose, as defined either
+  by sharing a Java type or a custom Spring component annotation.  The following sections describe how to address these two scenarios.
+ 
+** Using the <<<@DynamicTypedComponent>>> annotation to associate metadata with beans of a particular type
+
+  The <<Bean Metadata Lookup Framework>> includes an annotation (<<<@DynamicTypedComponent>>>) that can be used out of the box to define a bean and associate metadata with it.
+  The one required attribute is the Java type of the bean; other attributes can be defined generically as name/value pairs.
+
+  This annotation is intended to mark beans that provide varying implementations of a common interface, for example.  The annotation associates identifying metadata with each to allow 
+  programmatic lookup of the desired implementation at runtime.  The configuration defined above fully supports processing of the <<<@DynamicTypedComponent>>> annotation with the default 
+  implementation.
+
+ \[jc:org.simpliccity.sst.bean.lookup.PassingTestableComponent:--- UserGuide dynamicTypedComponent ---; highlight -ughighlight-\]
+ 
+  The expectation is that the bean tagged with <<<@DynamicTypedComponent>>> will actually implement the specified type.  To avoid classloading issues, the default implementation
+  does not enforce this at the time of component autodetection; however, this constraint will apply if a typed lookup is used (see 
+  {{Populating a BeanMetadataLookupContainer and calling the BeanMetadataLookupManager}} for details).
+  
+** Using a custom Spring component annotation to associate metadata with beans with a similar role
+
+  One of the nice features of Spring is that, in certain cases, it allows beans to be applied for a common purpose without forcing them to implement a common interface.  Anyone who has used
+  the features of Spring MVC knows that it is possible to designate beans as controllers strictly through annotations, without having to implement a Spring-specific interface.  The
+  {{{./transform.html}SST Transformation Framework}} provides a similar facility to define participating transformers.
+  
+  The <<Bean Metadata Lookup Framework>> fully supports this mode of defining candidate beans for lookup.  To do so, create a custom Spring component annotation following the guidelines
+  for using the {{{./bean_name.html}SST Bean Naming Framework}}.  In addition, the following steps are required to enable lookup support.
+  
+*** Make the bean name generator extend <<<AbstractLookupAnnotationNamespaceBeanNameGenerator>>>
+
+  The bean name generator class should extend <<<AbstractLookupAnnotationNamespaceBeanNameGenerator>>> instead of <<<AbstractAnnotationNamespaceBeanNameGenerator>>>.
+
+ \[jc:org.simpliccity.sst.transform.annotation.TransformationAnnotationBeanNameGenerator:--- UserGuide lookupNameGenerator ---\]
+  
+*** Implement the <<<getNameComponentsFromMetadata()>>> method to correspond with <<<getNameComponentsFromAnnotationMetadata()>>>
+
+  This method is used when looking up a bean marked with the custom annotation.  It should extract metadata elements from the corresponding <<<BeanMetadataLookupContainer>>> (see 
+  {{Defining a BeanMetadataLookupContainer}}) in the same order as used by the <<<getNameComponentsFromAnnotationMetadata()>>> method.  This ensures that both the mechanism that generates the 
+  name and the one that looks it up follow the same convention.
+
+ \[jc:org.simpliccity.sst.transform.annotation.TransformationAnnotationBeanNameGenerator:--- UserGuide nameComponents ---\]
+  
+* Invoking the Metadata Lookup Framework
+
+  The purpose of the framework is to make it possible to programmatically retrieve a bean uniquely identified by a set of metadata.  The <<<BeanMetadataLookupManager>>> configured 
+  above supplements the capabilities of the Spring application context to provide the necessary functionality.
+
+** Wiring the <<<BeanMetadataLookupManager>>>
+
+  To use the framework, you need an instance of the <<<BeanMetadataLookupManager>>> bean.  Any means of getting a Spring bean will work, but the easiest is to
+  use autowiring.  Add the following attribute to any class that needs to use the framework:
+
+ \[jc:org.simpliccity.sst.transform.Transformer:--- UserGuide beanMetadataLookupManager ---\]
+ 
+  For those that care, the <<<BeanMetadataLookupManager>>> is a singleton.  See the {{{../../apidocs/org/simpliccity/sst/bean/lookup/BeanMetadataLookupManager.html}BeanMetadataLookupManager javadoc}}
+  for more information on this class.
+
+** Defining a <<<BeanMetadataLookupContainer>>>
+
+  The <<<lookupBeanByMetadata()>>> method of the <<<BeanMetadataLookupManager>>> accepts an instance of a class implementing the <<<BeanMetadataLookupContainer>>> interface as an input.  The interface
+  defines the operations needed for <<<BeanMetadataLookupManager>>> to extract the metadata used to lookup the desired bean.  However, it is expected that developers will create custom implementations
+  of the interface that make it easy to specify the appropriate metadata for a particular use.
+  
+  <<<AbstractBeanMetadataLookupContainer>>> provides a generic typed base class to simplify the process.  It includes straightforward implementations of <<<isAnnotatedLookup()>>> and 
+  <<<isTypedLookup()>>> based on the generic type.  Developers can extend this class for a specific type, either a Java type used with the <<<@DynamicTypedComponent>>> annotation or a
+  custom Spring component annotation, and add getters/setters for the applicable metadata attributes.
+  
+ \[jc:org.simpliccity.sst.transform.annotation.TransformationBeanMetadataLookupContainer\]  
+
+** Populating a <<<BeanMetadataLookupContainer>>> and calling the <<<BeanMetadataLookupManager>>>
+
+  The framework expects that the metadata encapsulated by the <<<BeanMetadataLookupContainer>>> instance maps to at most a single bean in the application context.  The <<<lookupBeanByMetadata()>>> 
+  method is used to retrieve the bean represented by the specified metadata.
+
+ \[jc:org.simpliccity.sst.transform.Transformer:--- UserGuide lookupBeanByMetadata ---\]
+ 
+  Note that, since the type specified by the <<<BeanMetadataLookupContainer>>> input may represent an annotation on the desired bean rather than its Java type, the <<<lookupBeanByMetadata()>>> returns 
+  an instance of <<<Object>>>, not of the specified type.  However, bear in mind that if the type supported by the <<<BeanMetadataLookupContainer>>> implementation is not an annotation (i.e. the
+  container specifies a typed lookup), the lookup will only return a bean instance that actually has the specified type.
+  
+* Special Considerations
+
+** Implementing a Custom Metadata Lookup Strategy
+
+  Although the out-of-the-box implementation of the <<Bean Metadata Lookup Framework>> fully addresses the needs of the <<SST>> toolkit, it is not hard to imagine either that other uses might
+  benefit from a different implementation of the lookup mechanism or that Spring, itself, might eventually provide a similar functionality that could be incorporated into the framework.  With 
+  this in mind, the framework is designed to make it easy to swap out the default implementation, based on the {{{./bean_name.html}SST Bean Naming Framework}}, for a custom one.
+  
+  Conceptually, the framework is dependent on three related capabilities to do its job:
+  
+  * The ability to relate metadata to bean definitions
+  
+  * The ability to retain metadata at runtime
+  
+  * The ability to retrieve bean instances via their stored metadata
+  
+  []
+  
+  From the perspective of code, however, only the last one comes into play for the framework.  It employs the <Strategy> pattern to isolate the details of the lookup, which implicitly depends on specific
+  implementations of the former two capabilities, behind a single interface.  Any Spring bean that implements the following interface can be used in place of the default implementation.
+
+ \[jc:org.simpliccity.sst.bean.lookup.BeanMetadataLookupStrategy\]
+ 
+  Note that the interface defines two different lookup methods, one for annotated beans and one for beans of a specified type, to allow the implementation the flexibility to handle these in different ways.
+  Also note that the the typed lookup must provide support for beans marked with the <<<@DynamicTypedComponent>>> annotation.
+  
+  The following code sample illustrates how the lookup strategy can be set using the custom <<SST>> namespace in an XML bean configuration file.
+  
+ \[text:BeanMetadataLookupStrategyIT.xml:xml! metadataLookupStrategyConfig \]
+ 

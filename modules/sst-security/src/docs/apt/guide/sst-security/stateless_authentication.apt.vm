@@ -1,0 +1,288 @@
+ -----
+ ${displayTitle} Web Service Access Control Framework
+ -----
+ Kevin Fox
+ -----
+ 2014-08-07
+ -----
+
+ ~~    Copyright 2013 Information Control Corporation
+ ~~
+ ~~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~~ you may not use this file except in compliance with the License.
+ ~~ You may obtain a copy of the License at
+ ~~
+ ~~     http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing, software
+ ~~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~~ See the License for the specific language governing permissions and
+ ~~ limitations under the License.
+
+ ~~ NOTE: For help with the syntax of this file, see:
+ ~~ http://maven.apache.org/doxia/references/apt-format.html
+
+${displayTitle} Web Service Access Control Framework
+
+  Spring Web Services provides a robust framework for implementing SOAP-based, document-driven web services.  The framework frees service clients and provider endpoints from the complexities
+  of dealing with service transports, SOAP message processing and security mechanisms.  
+  
+  For the latter, Spring Web Services directly provides support for a variety of WS-Security capabilities while indirectly relying on other frameworks, like Spring Security, to address 
+  low-level security considerations such as authentication and authorization.  For the most part, these frameworks tend to provide abstractions for role-based access control but may not
+  necessarily include any easy way to define authorization checks based on the service request, itself.  
+  
+  As an example of where such domain-based authorization could apply, consider a service that allows a user to view or edit their personal profile.  In all likelihood, role-based access control
+  checks will do little to ensure that a user can only see their own data, since all authenticated users could be expected to have the necessary role to use the service.  Instead, what is needed 
+  is an authorization constraint that will ensure that the authenticated user matches the user for whom profile data has been requested (or perhaps has administrator-level access).  
+  
+  Ideally, such a constraint should be 
+  
+  * defined as part of the metadata associated with the service endpoint
+  
+  * applied by the framework, rather than the endpoint implementation
+  
+  * specified in terms of the request message, without reference to how the endpoint processes the message XML
+  
+  * extensible to support any domain-specific business logic required to evaluate the constraint
+  
+  []
+  
+  The <<Web Service Access Control Framework>> provides a simple, implementation-agnostic mechanism for defining and applying domain-based authorization constraints in a cross-cutting fashion to
+  service endpoints exposed using Spring Web Services.  The following sections describe how to configure, apply and extend this framework.
+
+%{toc|section=1|fromDepth=2|toDepth=3}
+
+* Configuring the Web Service Access Control Framework
+
+  The {{Basic Configuration}} steps describe how to use the "out of the box" configuration for the <<Web Service Access Control Framework>>.  This should be sufficient for most applications.  However, if 
+  you need more control over how the framework works under the covers, see {{Advanced Configuration}}.
+  
+  This framework makes use of the {{{./metadata_lookup.html}SST Bean Metadata Lookup Framework}} to retrieve beans which implement access control rules.  The steps described below address all necessary 
+  configuration to employ the <<Bean Metadata Lookup Framework>> for this purpose.
+  
+** Basic Configuration
+
+  <<SST>> provides a custom XML namespace that can be used to configure the <<Web Service Access Control Framework>> for use in an application.  Follow these steps to enable the framework.
+
+  [[1]] To use the custom namespace in an application context configuration file, first add the namespace definition to the <<<\<beans\>>>> tag at the top of the file:
+  
+    \[text:EndpointAccessValidatorInterceptorIT.xml:xml! customNamespace \]
+ 
+    Notice, the definition of both the <<sst>> and <<sstws>> namespaces and the corresponding entries in the <<<schemaLocation>>>.  The XSD files for the namespaces are bundled in the
+    <<<sst-core>>> and <<<sst-ws>>> JAR files, respectively, so these must be included on the application classpath.
+  
+  [[2]] The framework identifies candidate beans for authorization constraints through Spring's component autodetection.  Use the following two lines to configure it:
+  
+    \[text:EndpointAccessValidatorInterceptorIT.xml:xml! scanConfig \]
+ 
+    <Be sure to add the necessary application package(s) in the> <<<base-package>>> <attribute (the list is comma-separated) so that the annotated beans can be
+    found.>
+  
+  [[3]] Add the following line to configure the {{{../sst-core/metadata_lookup.html}SST Bean Metadata Lookup Framework}}:
+
+    \[text:EndpointAccessValidatorInterceptorIT.xml:xml! metadataLookupConfig \]
+    
+    Note, the <<<\<sst:transformer\>>>> tag could alternatively be used to configure the <<Bean Metadata Lookup Framework>> if the {{{../sst-core/transform.html}SST Transformation Framework}} will also be employed.
+
+  [[4]] Define a service endpoint interceptor for the <<Web Service Access Control Framework>> using the <<<\<sstws:access-interceptor\>>>> tag:
+
+    \[text:EndpointAccessValidatorInterceptorIT.xml:xml! accessInterceptor \]
+    
+    This tag defines a service endpoint interceptor bean from the {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/EndpointAccessValidatorInterceptor.html}EndpointAccessValidatorInterceptor class}}.
+    Note that the <<<id>>> can be any valid bean name. Also note that the default configuration assumes the use of Spring Security as the underlying security framework.  See {{Creating a custom security system integration}}
+    for details on how to configure the interceptor to use a different security framework.
+
+  [[5]] Add the <<Web Service Access Control Framework>> endpoint interceptor defined by the <<<\<sstws:access-interceptor\>>>> tag to the Spring Web Service configuration:
+
+    \[text:EndpointAccessValidatorInterceptorIT.xml:xml! swsConfig \]
+    
+    Note that the <<Web Service Access Control Framework>> endpoint interceptor should appear after any other security-related interceptors (e.g. <<<authenticationValidator>>>).
+
+  []
+  
+** Advanced Configuration
+
+  The <<<\<sstws:access-interceptor\>>>> tag can reference a custom security handler for use by the framework.  See the section on {{Creating a custom security system integration}} for further information.
+  
+  Supporting beans named <sstSpringSecurityEndpointSecurityHandler>, <sstBeanMetadataLookupManager> and <sstBeanMetadataLookupStrategy> are defined, by the default configuration, .  Be sure not to define 
+  any beans that use these names.
+  
+  If for some reason you prefer to directly configure the <<<EndpointAccessValidatorInterceptor>>> bean, rather than relying on the custom namespace, see the
+  {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/EndpointAccessValidatorInterceptor.html}EndpointAccessValidatorInterceptor javadoc}} for information on the configurable properties.
+
+  
+* Securing web service endpoints
+  
+  The endpoint interceptor defined by the {{Basic Configuration}} processes all incoming service requests before they are routed to the appropriate service endpoint (i.e. a class marked with the <<<@Endpoint>>>
+  annotation).  It determines whether a domain-level security constraint has been defined for the corresponding handling method, evaluating it, if so.  If the constraint passes, processing of the invocation
+  chain continues; otherwise, an <<<EndpointAccessException>>> is thrown, preventing the execution of the handling method and (likely) generating a SOAP fault back to the client.
+  
+  In this way, the <<Web Service Access Control Framework>> offloads all of the heavy lifting of applying domain-based authorization for web service endpoints.  It only remains for the developer to define
+  the security constraints on the handling methods and to implement the business logic behind individual access control rules.  The framework serves to simplify each of these tasks, as well.
+    
+** Defining security constraints
+
+  A security constraint is defined as a set of restrictions applied to the user associated with the service request and the <payload> of the incoming service request message.  As a result, unlike other security 
+  approaches which rely solely on standardized message headers, the <<Web Service Access Control Framework>> is able to ensure that the combination of user and request message content conforms to applicable business 
+  rules before the underlying endpoint implementation is invoked. 
+  
+  A security constraint is applied to an endpoint handling method by marking it with the <<<@PayloadControl>>> annotation.  The metadata of this annotation, including an array of <<<@PayloadRestriction>>> 
+  annotations which define individual restrictions, fully specifies the business rules that the request message payload must meet.
+  
+ \[jc:org.simpliccity.sst.ws.endpoint.security.SendGreetingEndpoint:--- UserGuide payloadControl ---; highlight -ughighlight-\]
+  
+  The following topics address the various aspects of using the <<<@PayloadControl>>> annotation.  See the {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/annotation/PayloadControl.html}annotation javadoc}}
+  for further details.
+  
+*** Defining restrictions
+
+  As described in more detail in {{Implementing access control rules}}, the <<Web Service Access Control Framework>> uses beans conforming to the 
+  {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/EndpointAccessControlRule.html}EndpointAccessControlRule interface}} to implement domain authorization checks.  It is up to these beans to validate 
+  whether the user associated with the service request should be able to perform the service with the specified message content.  
+  
+  In order for such beans to be reusable across multiple service operations, the interface abstracts away details of the message structure and the underlying security system.  It is left to the framework to extract 
+  the desired portion of the incoming request message and pass it to the appropriate bean, along with the authenticated user, for processing.  An instance of the <<<@PayloadRestriction>>> annotation is used to 
+  specify the metadata (i.e. a combination of a specific access control bean with a definition of the portion of the request message to be validated) required for the framework to apply an individual restriction
+  as part of the overall access control on the payload.
+  
+  Following is an example of the <<<restriction>>> element of a <<<@PayloadControl>>> annotation that defines multiple restrictions using the <<<@PayloadRestriction>>> annotation:
+
+ \[jc:org.simpliccity.sst.ws.endpoint.security.SendGreetingEndpoint:--- UserGuide restrictions ---\]
+  
+  The <<<@PayloadRestriction>>> annotation specifies the following elements to define an individual security restriction:
+  
+  [check] The framework-specific id of a bean used to perform the access control rule check (see {{Implementing access control rules}})
+  
+  [path] An XPath expression identifying the portion of the request message to be evaluated.  The expression may evaluate to multiple nodes.  (Note: any XML namespaces needed by the XPath expression must be defined 
+  using the <<<namespaces>>> element of the containing <<<@PayloadControl>>> annotation)
+  
+  []
+     
+*** Controlling how multiple restrictions are applied
+
+  A single <<<@PayloadControl>>> annotation may include multiple restrictions defined using the <<<@PayloadRestriction>>> annotation.  This makes it possible to break complicated business rules down into modular
+  pieces that can be reused and applied in varying combinations across endpoints and operations.  The <<Web Service Access Control Framework>> provides a great deal of flexibility in controlling how the results 
+  of multiple restrictions are combined to determine whether or not access is allowed.
+  
+  The <<<pass>>> element of the containing <<<@PayloadControl>>> annotation is used to specify which restrictions must pass in order for the request to proceed.  
+  
+ \[jc:org.simpliccity.sst.ws.endpoint.security.SendGreetingEndpoint:--- UserGuide pass ---\]
+  
+  The available options (defined by the <<<ControlPassOption>>> enumeration) are:
+  
+  [ALL] All of the specified restrictions must evaluate to <<<true>>>.  This represents a restrictive security model (<<default>>)
+  
+  [ANY] At least one of the specified restrictions must evaluate to <<<true>>>.  This represents a permissive security model
+  
+  [MAJORITY] More than half of the specified restrictions must evaluate to <<<true>>>
+  
+  []
+
+  The framework is designed to handle the common scenarios represented by these options.  If more complicated interactions between rules are required (e.g. a particular rule only applies if another rule fails),
+  they can be implemented within the access control beans, themselves.  By using beans to represent the rules, rather than an expression language, the framework maintains a balance between ease of use and expressive
+  power.
+
+*** Excluding user roles from the restrictions
+
+  A common security use case requires that administrative users be able to access resources that are not available to "normal" users.  In the case of domain-level security, this means that such a user may need
+  to place service requests whose content does not directly align with their identity (consider the example of admin access to a user profile in the scenario described above).  Essentially, possessing a specified
+  role makes the user exempt from rules based on message content.
+
+  The <<Web Service Access Control Framework>> addresses this through the <<<roleExclusions>>> element of the <<<@PayloadControl>>> annotation.  If the user associated with a service request has any of the roles
+  listed for <<<roleExclusions>>>, the request will be allowed to continue without evaluating the specified restrictions.  Role exclusions are, of course, optional.
+  
+  The following example illustrates how to allow users with the <<ADMIN>> role (assuming the use of Spring Security) to place a service request regardless of the request message content:
+  
+ \[jc:org.simpliccity.sst.ws.endpoint.security.SendGreetingEndpoint:--- UserGuide exclusions ---\]
+ 
+  <Note that the framework relies on the underlying security system to determine role membership, so the roles must be named accordingly.>
+
+** Implementing access control rules
+
+  Since the scope for domain-related access control is broader than the much simpler case of role-based security, the <<Web Service Access Control Framework>> is designed to give developers full latitude to
+  employ whatever logic is required to implement the desired access control rules.  In support of this, the framework provides a simple service provider interface (SPI) that allows developers to plug in custom 
+  Spring beans as access control rules. 
+  
+  An access control rule class must meet the following two conditions:
+  
+  [[1]] It must implement the {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/EndpointAccessControlRule.html}EndpointAccessControlRule interface}}.
+  
+    \[jc:org.simpliccity.sst.service.security.ServiceAccessControlRule\]
+    
+    This interface defines a simple method signature that allows the framework to pass all relevant information about the service call to the bean for evaluation.
+   
+  [[2]] It must be marked with the <<<@AccessValidator>>> annotation.
+  
+    \[jc:org.simpliccity.sst.service.security.rules.IdentityServiceAccessControlRule:--- StyleGuide webservice.accessvalidator ---\]
+ 
+    Marked classes will automatically be recognized by Spring annotation scanning, assuming that the {{Basic Configuration}} is followed.  The value specified in this annotation defines the id by which 
+    the access control rule can be referenced in the <<<check>>> element of a <<<@PayloadRestriction>>> annotation.
+
+  []
+  
+  The SPI fully insulates access rule classes from the details of Spring Web Services and the inner workings of the <<Web Service Access Control Framework>>, leaving the developer free to focus on implementing
+  the desired domain logic.  There are, however, a few practical considerations that the developer should keep in mind:
+  
+  * Access control rule classes must appear on the runtime classpath.
+  
+  * All packages containing access control rule classes must be listed, either explicitly or implicitly via a parent package, in the <<<base-package>>> attribute of the <<<\<context:component-scan\>>>> tag used
+  to configure Spring annotation scanning.  See {{Basic Configuration}} for details.
+   
+  * The developer should avoid using code that significantly degrades application performance.  Since the access control rule logic is executed prior to the actual processing of the web service endpoint,
+  any performance issues will negatively affect the responsiveness of the service call.
+  
+  * The developer should not implement code that has side effects on the application state.  This is not the appropriate place to embed business logic or data update functionality.  The framework is designed to
+  promote effective separation of concerns.  Do not abuse it.
+  
+  []  
+  
+*** Creating reusable access control rules
+
+  Note that the <<Web Service Access Control Framework>> SPI abstracts away the source of the specific data to be evaluated by an access control rule.  Particularly, it hides the correlation between the
+  content arguments and the structure of the incoming request message.  This is an intentional design choice to encourage developers to create reusable access control rule classes.  
+  
+  By removing any reference to the message structure, the SPI forces the developer to focus on the semantics, rather than the syntax, of the content.  Thus, it should be possible for the same rule to be applied in
+  any situation with similar semantics, regardless of the structure of the incoming request message, simply by using the appropriate XPath expression in the <<<path>>> element of a <<<@PayloadRestriction>>> annotation.
+  Developers should be on the lookout for opportunities to reduce the complexity of their codebase, and to improve the expressiveness of their code, by creating reusable access control rules.
+
+*** The <<<identity>>> access control rule
+
+  As an example of the above design approach, the <<Web Service Access Control Framework>> includes a built-in access control rule that can be used in a wide variety of situations.  This rule validates that the 
+  specified message content matches the identity of the calling user.  It would be useful for scenarios such as the example described above, in which the authenticated user must match the id for which user profile 
+  data is requested.
+  
+  This rule is automatically registered when using the {{Basic Configuration}} and is referenced with the id <<<identity>>>.  See the 
+  {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/IdentityEndpointAccessControlRule.html}IdentityEndpointAccessControlRule javadoc}} for more information.
+  
+* Special Considerations
+
+  The following sections supplement the basic framework documentation by addressing special cases that can arise.  The information presented here is not required to use the core functionality of the 
+  <<Web Service Access Control Framework>>; however, it can be useful when tailoring the capabilities of the framework to the specific needs of an application. 
+
+** Creating a custom security system integration
+
+  The {{Basic Configuration}} assumes that the application uses Spring Security to abstract away from the details of the underlying security system responsible for authentication and role-based access control, since
+  this is a common configuration for Spring Web Services.  However, the <<Web Service Access Control Framework>> can be adapted to work with another underlying security system, if so desired.  There are two steps
+  required to enable such a custom integration.
+  
+*** Implement a custom <<<EndpointSecurityHandler>>> class
+
+  The framework uses a class that implements the {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/EndpointSecurityHandler.html}EndpointSecurityHandler interface}} as an adapter to mediate its interaction with
+  the underlying security system.
+  
+ \[jc:org.simpliccity.sst.service.security.ServiceSecurityHandler\]
+  
+  Any Spring bean that implements this interface can be used in place of the default handler: {{{../../apidocs/org/simpliccity/sst/ws/endpoint/security/spring/SpringSecurityEndpointSecurityHandler.html}SpringSecurityEndpointSecurityHandler}}.
+  The bean class is responsible for carrying out the defined operations using the appropriate API's for the target security system.
+  
+  The implementation class should be designed to be configurable through standard Spring mechanisms, so that it can be effectively wired up to the <<Web Service Access Control Framework>>, as described below.
+
+*** Configure the framework to use the custom handler class
+
+  [[1]] Define a Spring bean using the handler class created as described in the previous section.
+  
+  [[2]] On the <<<\<sstws:access-interceptor\>>>> tag which defines the service endpoint interceptor, reference the custom handler bean with the <<<securityHandlerRef>>> attribute.
+  
+ \[text:EndpointAccessValidatorInterceptorIT.xml:xml! customSecurityHandler \]
+  

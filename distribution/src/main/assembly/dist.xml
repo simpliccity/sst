@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2009 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<assembly>
+	<id>dist</id>
+	<formats>
+		<format>zip</format>
+		<format>tar.gz</format>
+	</formats>
+	
+	<dependencySets>
+	
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst</include>
+			</includes>
+		</dependencySet>
+		
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules</outputDirectory>
+			<includes>
+				<include>${project.groupId}:modules</include>
+			</includes>
+		</dependencySet>
+		
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-core</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-core</include>
+			</includes>
+		</dependencySet>
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-data-rest</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-data-rest</include>
+			</includes>
+		</dependencySet>
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-jwt</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-jwt</include>
+			</includes>
+		</dependencySet>
+
+<!-- 		<dependencySet> -->
+<!-- 			<useProjectArtifact>false</useProjectArtifact> -->
+<!-- 			<outputDirectory>dist/modules/sst-int</outputDirectory> -->
+<!-- 			<includes> -->
+<!-- 				<include>${project.groupId}:sst-int</include> -->
+<!-- 			</includes> -->
+<!-- 		</dependencySet> -->
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-security</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-security</include>
+			</includes>
+		</dependencySet>
+
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-web</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-web</include>
+			</includes>
+		</dependencySet>
+		
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-webflow</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-webflow</include>
+			</includes>
+		</dependencySet>
+		
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<outputDirectory>dist/modules/sst-ws</outputDirectory>
+			<includes>
+				<include>${project.groupId}:sst-ws</include>
+			</includes>
+		</dependencySet>
+		
+<!-- 		<dependencySet> -->
+<!-- 			<useProjectArtifact>false</useProjectArtifact> -->
+<!-- 			<outputDirectory>dist/modules/sstws-maven-plugin</outputDirectory> -->
+<!-- 			<includes> -->
+<!-- 				<include>${project.groupId}:sstws-maven-plugin</include> -->
+<!-- 			</includes> -->
+<!-- 		</dependencySet> -->
+		
+		<dependencySet>
+			<useProjectArtifact>false</useProjectArtifact>
+			<unpack>true</unpack>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>${project.groupId}:documentation</include>
+			</includes>
+		</dependencySet>
+		
+	</dependencySets>
+	
+</assembly>

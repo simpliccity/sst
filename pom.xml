@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2009 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+  		<groupId>org.simpliccity</groupId>
+  		<artifactId>simpliccity-parent</artifactId>
+  		<version>10</version>
+  	</parent>
+  	<groupId>org.simpliccity.sst</groupId>
+  	<artifactId>sst</artifactId>
+  	<version>1.0.0-SNAPSHOT</version>
+  	<packaging>pom</packaging>
+  	<name>Simple Spring Toolkit</name>
+  	<description>${displayTitle} parent project</description>
+  	<inceptionYear>2009</inceptionYear>
+
+  	<properties>
+  	
+  		<displayTitle>Simple Spring Toolkit (SST)</displayTitle>
+  		<javaDocClassifier>javadoc</javaDocClassifier>
+  		<javaDocPackage>zip</javaDocPackage>
+  		<basePackagePath>org/simpliccity/sst</basePackagePath>
+   		
+  		<!-- Referenced Javadoc locations -->
+  		<coreSpringJavadocUrl>http://docs.spring.io/spring/docs/${springVersion}/javadoc-api/</coreSpringJavadocUrl>
+  		<springWebServicesJavadocUrl>http://docs.spring.io/spring-ws/sites/2.0/apidocs</springWebServicesJavadocUrl>
+  		<springWebFlowJavadocUrl>http://docs.spring.io/spring-webflow/docs/${springWebFlowVersion}/api/</springWebFlowJavadocUrl>
+  		<springSecurityJavadocUrl>http://docs.spring.io/spring-security/site/docs/${springSecurityVersion}/apidocs/</springSecurityJavadocUrl>
+  		<mavenCoreJavadocUrl>http://maven.apache.org/ref/${maven-library-version}/maven-core/apidocs/</mavenCoreJavadocUrl>
+  		<mavenPluginJavadocUrl>http://maven.apache.org/ref/${maven-library-version}/maven-plugin-api/apidocs/</mavenPluginJavadocUrl>
+  		<mavenPluginAnnotationJavadocUrl>http://maven.apache.org/plugin-tools/maven-plugin-annotations/apidocs/</mavenPluginAnnotationJavadocUrl>
+  		<!-- Workaround for change in Java Javadoc location -->
+  		<coreJavaJavadocUrl>http://docs.oracle.com/javase/7/docs/api/</coreJavaJavadocUrl>
+  		
+  		<!-- Workarounds for future POM elements -->
+  		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
+		<!-- Versions -->
+  		<simpliccity.licenseVersion>2.0.0</simpliccity.licenseVersion>
+		<styleGuideVersion>1.1.5</styleGuideVersion>  		
+		<springVersion>4.2.6.RELEASE</springVersion>
+		<springDataVersion>Gosling-SR2A</springDataVersion>
+		<springWebFlowVersion>2.4.2.RELEASE</springWebFlowVersion>
+		<springWSVersion>2.3.0.RELEASE</springWSVersion>
+		<springSecurityVersion>4.0.3.RELEASE</springSecurityVersion>
+		<springIntegrationVersion>2.2.4.RELEASE</springIntegrationVersion>
+		<maven-library-version>3.3.9</maven-library-version>
+		
+ 	 </properties>
+  
+	<modules>
+		<module>modules</module>
+	</modules>
+ 	 
+	<distributionManagement>
+		<site>
+			<id>icc.simpliccity.site</id>
+			<url>dav:http://nexus.icc.local/nexus/content/sites/icc.simpliccity.site/${project.groupId}/${project.version}/</url>
+		</site>
+	</distributionManagement>
+ 
+ 	<dependencyManagement>
+ 	
+ 		<dependencies>
+ 		
+ 			<!-- Import -->
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${springVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>	
+
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-releasetrain</artifactId>
+				<version>${springDataVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>	
+			 
+			<!-- Compile -->
+						
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>${maven-library-version}</version>
+				<scope>compile</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-core</artifactId>
+				<version>${maven-library-version}</version>
+				<scope>compile</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.apache.maven.plugin-tools</groupId>
+				<artifactId>maven-plugin-annotations</artifactId>
+				<version>3.4</version>
+				<scope>compile</scope>
+			</dependency>			
+					
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>1.3.2</version>
+				<scope>compile</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.2</version>
+				<scope>compile</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jayway.jsonpath</groupId>
+				<artifactId>json-path</artifactId>
+				<version>2.2.0</version>
+				<scope>compile</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt</artifactId>
+				<version>0.6.0</version>
+				<scope>compile</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>2.6.0</version>
+				<scope>compile</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.6.0</version>
+				<scope>compile</scope>
+			</dependency>
+																
+			<!-- Provided -->
+
+			<dependency>
+				<groupId>org.simpliccity.styleguide</groupId>
+				<artifactId>styleguide-core</artifactId>
+				<version>${styleGuideVersion}</version>
+				<scope>provided</scope>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.webflow</groupId>
+				<artifactId>spring-webflow</artifactId>
+				<version>${springWebFlowVersion}</version>
+				<scope>provided</scope>
+			</dependency>  			
+			
+			<dependency>   
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-ws-core</artifactId>
+				<version>${springWSVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+				
+			<dependency>
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-ws-security</artifactId>
+				<version>${springWSVersion}</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.xml.wsit</groupId>
+						<artifactId>xws-security</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.wsit</groupId>
+						<artifactId>wsit-rt</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+						
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-core</artifactId>
+				<version>${springSecurityVersion}</version>
+				<scope>provided</scope>
+			</dependency>		
+
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-web</artifactId>
+				<version>${springSecurityVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.integration</groupId>
+				<artifactId>spring-integration-core</artifactId>
+				<version>${springIntegrationVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework.integration</groupId>
+				<artifactId>spring-integration-jms</artifactId>
+				<version>${springIntegrationVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework.integration</groupId>
+				<artifactId>spring-integration-xml</artifactId>
+				<version>${springIntegrationVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>1.1.0.Final</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>javax.servlet.jsp</groupId>
+				<artifactId>javax.servlet.jsp-api</artifactId>
+				<version>2.3.1</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>jstl</artifactId>
+				<version>1.2</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.portlet</groupId>
+				<artifactId>portlet-api</artifactId>
+				<version>2.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>18.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>2.6</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Test -->
+			
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+			   
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<scope>test</scope>
+				<optional>true</optional>
+				<version>1.2.17</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>  
+				<version>2.1.0</version> 
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${springVersion}</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+			   
+			<dependency>   
+				<groupId>org.springframework.ws</groupId>
+				<artifactId>spring-ws-test</artifactId>
+				<version>${springWSVersion}</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-config</artifactId>
+				<version>${springSecurityVersion}</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>org.codehaus.sonar-plugins.java</groupId>
+				<artifactId>sonar-jacoco-listeners</artifactId>
+				<version>3.2</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+				
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb-j5</artifactId>
+				<version>2.2.4</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>5.2.2.Final</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>4.2.21.Final</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+				<version>3.0.0</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>org.skyscreamer</groupId>
+				<artifactId>jsonassert</artifactId>
+				<version>1.3.0</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>
+			
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.10</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>			
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.7.21</version>
+				<scope>test</scope>
+				<optional>true</optional>
+			</dependency>			
+			
+			<!-- Runtime -->
+			
+			<dependency>
+				<groupId>org.apache.ws.xmlschema</groupId>
+				<artifactId>xmlschema-core</artifactId>
+				<version>2.2.1</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.ws.security</groupId>
+				<artifactId>wss4j</artifactId>
+				<version>1.6.19</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>wsdl4j</groupId>
+				<artifactId>wsdl4j</artifactId>
+				<version>1.6.3</version>
+				<scope>runtime</scope>
+			</dependency>
+				
+ 		</dependencies>
+ 		
+ 	</dependencyManagement>
+ 	 
+	<build>
+	
+		<pluginManagement>
+			<plugins>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.6.1</version>
+		  			<configuration>
+	  					<source>1.7</source>
+	  					<target>1.7</target>
+	  				</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.2</version>
+<!-- 					<configuration> -->
+<!-- 						<deployAtEnd>true</deployAtEnd> -->
+<!-- 					</configuration> -->
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.2</version>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-remote-resources-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+			
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.6</version>
+ 					<dependencies>
+ 		            	<dependency>
+ 			              	<groupId>org.apache.maven.wagon</groupId>
+ 			              	<artifactId>wagon-webdav-jackrabbit</artifactId>
+ 			              	<version>2.10</version>
+ 		            	</dependency>
+           			</dependencies>					 
+				</plugin>
+				
+		  		<plugin>
+		  			<groupId>org.apache.maven.plugins</groupId>
+		  			<artifactId>maven-javadoc-plugin</artifactId>
+		  			<version>2.10.4</version>
+		  		</plugin>
+		  		
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+		  			<version>3.0.0</version>
+		  		</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+		  			<version>3.0.1</version>
+		  		</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+		  			<version>3.0.0</version>
+		  		</plugin>
+
+	      		<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>3.5</version>
+	      		</plugin>
+		  		
+		      	<plugin>
+	   	     		<groupId>org.apache.maven.plugins</groupId>
+	      	  		<artifactId>maven-surefire-plugin</artifactId>
+	      	  		<version>2.19.1</version>
+	      		</plugin>
+
+		      	<plugin>
+	   	     		<groupId>org.apache.maven.plugins</groupId>
+	      	  		<artifactId>maven-failsafe-plugin</artifactId>
+	      	  		<version>2.19.1</version>
+	      		</plugin>
+
+	      		<plugin>
+	      			<groupId>org.jacoco</groupId>
+	      			<artifactId>jacoco-maven-plugin</artifactId>
+	      			<version>0.7.5.201505241946</version>
+	      		</plugin>
+	      		
+	      		<plugin>
+	      			<groupId>org.simpliccity.styleguide</groupId>
+	      			<artifactId>styleguide-maven-plugin</artifactId>
+	      			<version>${styleGuideVersion}</version>
+	      		</plugin>
+	      		
+				<plugin>
+					<groupId>org.jvnet.jaxb2.maven2</groupId>
+					<artifactId>maven-jaxb2-plugin</artifactId>
+					<version>0.13.1</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				
+				<plugin>
+					<groupId>com.coderplus.maven.plugins</groupId>
+					<artifactId>copy-rename-maven-plugin</artifactId>
+					<version>1.0</version>
+				</plugin>
+
+        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        		<plugin>
+        			<groupId>org.eclipse.m2e</groupId>
+        			<artifactId>lifecycle-mapping</artifactId>
+        			<version>1.0.0</version>
+        			<configuration>
+        				<lifecycleMappingMetadata>
+        					<pluginExecutions>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>org.apache.maven.plugins</groupId>
+        								<artifactId>maven-remote-resources-plugin</artifactId>
+        								<versionRange>[1.5,)</versionRange>
+        								<goals>
+        									<goal>process</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore></ignore>
+        							</action>
+        						</pluginExecution>
+        					</pluginExecutions>
+        				</lifecycleMappingMetadata>
+        			</configuration>
+        		</plugin>
+ 	      		
+			</plugins>
+			
+		</pluginManagement>
+	
+		<plugins>
+		
+			<!-- Retrieve license files as resources from parent -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-remote-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>process</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includeProjectProperties>true</includeProjectProperties>
+					<resourceBundles>
+						<resourceBundle>
+							org.simpliccity:simpliccity-license:${simpliccity.licenseVersion}
+						</resourceBundle>
+					</resourceBundles>
+				</configuration>
+			</plugin>
+			
+		</plugins>
+		
+	</build>
+ 
+	<profiles>
+	
+		<profile>
+			<!-- Configurations for a full distribution build -->
+			<id>dist</id>
+			
+			<modules>
+				<module>documentation</module>
+				<module>distribution</module>
+			</modules>
+			
+			<build>
+			
+				<plugins>
+				
+					<plugin>
+						<groupId>com.coderplus.maven.plugins</groupId>
+						<artifactId>copy-rename-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-poms</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<sourceFile>${project.basedir}/pom.xml</sourceFile>
+									<destinationFile>${pomStagingDirectory}/${project.artifactId}.pom</destinationFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					
+					<!-- Allow documentation project to compile and deploy the site documentation -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-site-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>default-site</id>
+								<goals>
+									<goal>site</goal>
+								</goals>
+							</execution>
+						
+				 	  		<!-- Stage site content for packaging and deployment by documentation project -->
+							<execution>
+								<id>stage</id>
+								<phase>post-site</phase>
+								<goals>
+									<goal>stage</goal>
+								</goals>
+								<configuration>
+									<stagingDirectory>${docStagingDirectory}</stagingDirectory>
+ 								</configuration>
+ 							</execution> 
+		 					<execution>
+								<id>default-deploy</id>
+								<goals>
+									<goal>deploy</goal>
+								</goals>
+								<configuration>
+									<skipDeploy>true</skipDeploy>
+								</configuration>
+							</execution>
+ 						</executions> 
+ 					</plugin>		 
+
+					<!-- Create consolidated source release ZIP for entire project -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>			  			
+			  			<executions>
+			  				<execution>
+			  					<id>source-release</id>
+			  					<phase>package</phase>
+			  					<goals>
+			  						<goal>single</goal>
+			  					</goals>
+			  					<configuration>
+			  						<descriptorRefs>
+			  							<descriptorRef>project</descriptorRef>
+			  						</descriptorRefs>
+			  						<tarLongFileMode>gnu</tarLongFileMode>
+			  						<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+			  					</configuration>
+			  				</execution>
+			  			</executions>
+					</plugin>
+							
+				</plugins>
+				
+			</build>
+		
+			<reporting>
+				<excludeDefaults>true</excludeDefaults>
+			</reporting>
+			
+		</profile>
+		
+		<profile>
+			<!-- Configurations for generating Sonar metrics -->
+			<id>sonar</id>
+			
+			<properties>
+		  		<!-- Sonar configurations -->
+				<sonar.verbose>true</sonar.verbose>
+				<sonar.skippedModules>distribution,documentation</sonar.skippedModules>
+				<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+				<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+				<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+				<sonar.jacoco.reportPath>${jacocoDirectory}/jacoco.exec</sonar.jacoco.reportPath>
+				<sonar.exclusions>**/HelpMojo.java</sonar.exclusions>
+			</properties>
+			
+			<build>
+			
+				<pluginManagement>
+				
+					<plugins>
+					
+				      	<plugin>
+			   	     		<groupId>org.sonarsource.scanner.maven</groupId>
+			      	  		<artifactId>sonar-maven-plugin</artifactId>
+			      	  		<version>3.2</version>
+			      		</plugin> 
+			      		   		
+					</plugins>
+					
+				</pluginManagement>
+				
+			</build>
+			
+			<reporting>
+			
+				<plugins>
+				
+			  		<plugin>
+			  			<groupId>org.codehaus.sonar-plugins</groupId>
+			  			<artifactId>maven-report</artifactId>
+			  			<version>0.1</version>
+			  		</plugin>
+			  		
+				</plugins>
+				
+			</reporting>
+			
+		</profile>
+
+		<!-- Profile to handle JCite-related processing -->    
+        <profile>
+            <id>jcite-processing</id>
+            <activation>
+            	<file>
+            	    <exists>${jciteCommandPath}</exists>
+            	</file>
+            </activation>
+            
+			<reporting>
+			
+				<excludeDefaults>true</excludeDefaults>
+				
+				<plugins>
+
+	 		        <!-- Render StyleGuide report for entire project -->
+					<plugin>
+						<groupId>org.simpliccity.styleguide</groupId>
+						<artifactId>styleguide-maven-plugin</artifactId>
+						<version>${styleGuideVersion}</version>
+						<configuration>
+							<reportLabel>${displayTitle}</reportLabel>
+							<failOnError>false</failOnError>
+						</configuration>
+						<reportSets>
+							<reportSet>
+								<reports>
+									<report>aggregate</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>	
+			
+				</plugins>
+				
+			</reporting>
+			            
+        </profile> 
+
+	</profiles>	
+
+</project>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema elementFormDefault="qualified" version="1.0" targetNamespace="http://www.simpliccity.org/schema/sst/test/access" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="SendGreetingRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="from" type="xs:string"/>
+        <xs:element name="to" type="xs:string"/>
+        <xs:element name="message" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SendGreetingResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="greeting" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SendMultipleGreetingsRequest">
+    <xs:complexType>
+      <xs:sequence>
+      	<xs:element name="from" type="xs:string"/>
+        <xs:element name="to" type="xs:string" maxOccurs="*"/>
+        <xs:element name="message" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SendMultipleGreetingsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="greeting" type="xs:string" maxOccurs="*"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="WaveRequest">
+  	<xs:complexType>
+  		<xs:sequence>
+ 	      <xs:element name="from" type="xs:string"/>
+  		  <xs:element name="name" type="xs:string" maxOccurs="*"/>
+  		</xs:sequence>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="WaveResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="greeting" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+</xs:schema>
+

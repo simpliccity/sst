@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleguide xmlns="http://www.simpliccity.org/schema/styleguide" id="SST" name="SST">
+    <categories>
+        <category name="Documentation" id="documentation">
+            <topics>
+                <topic name="StyleGuide" id="styleguide"/>
+            </topics>
+        </category>
+        <category name="Integration Testing" id="integration">
+        	<citations>
+        		<citation ref="integration.html" type="HTML" placement="TOP" />
+        	</citations>
+            <topics>
+                <topic name="Initializing a Spring Container" id="initialize"/>
+                <topic name="Reinitializing a Spring Container between tests" id="dirtyContext">
+                	<citations>
+                		<citation ref="dirtyContext.html" type="HTML" placement="TOP"/>
+                	</citations>
+                </topic>
+                <topic name="Working with an Embedded Database" id="embeddedDb">
+                	<citations>
+                		<citation ref="embeddedDB.html" type="HTML" placement="TOP" />
+                	</citations>
+                </topic>
+            </topics>
+        </category>
+        <category name="Resource Handling" id="resource">
+            <topics>
+                <topic name="Loading Properties from a Classpath Resource" id="loadClasspath"/>
+            </topics>
+        </category>
+        <category name="Web Services Support" id="webservice">
+            <topics>
+                <topic name="Defining an Access Validator" id="accessvalidator"/>
+            </topics>
+        </category>
+    </categories>
+</styleguide>

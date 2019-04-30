@@ -1,0 +1,95 @@
+ ------
+ Overview
+ ------
+ Kevin Fox
+ ------
+ 2016-06-03
+ ------
+
+ ~~    Copyright 2013 Information Control Corporation
+ ~~
+ ~~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~~ you may not use this file except in compliance with the License.
+ ~~ You may obtain a copy of the License at
+ ~~
+ ~~     http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing, software
+ ~~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~~ See the License for the specific language governing permissions and
+ ~~ limitations under the License.
+
+ ~~ NOTE: For help with the syntax of this file, see:
+ ~~ http://maven.apache.org/doxia/references/apt-format.html
+
+${displayTitle}
+
+  As its name suggests, the Simple Spring Toolkit, referred to as <<SST>>, is a collection of
+  simple tools designed to make working with the {{{https://spring.io}Spring development framework}}
+  even easier and more powerful.  The tools assembled here, consisting of a variety of
+  simple frameworks, utilities and plugins, have all been developed as practical solutions to
+  real world programming problems.  The goal in creating them has been to extend the Spring
+  approach to address situations that the developers have commonly encountered when using
+  Spring for their own projects.
+  
+  One of the key benefits of the Spring framework is the ease with which the various Spring projects
+  can be combined to provide an end-to-end development solution for common application types.
+  Similarly, <<SST>> is broken down into a set of modules which are designed to provide tools targeted
+  for various Spring projects while ensuring that they all work together effectively.  For example,
+  a framework in the <sst-ws> module, which provides support for the Spring Web Services project,
+  may depend on capabilities from the <sst-core> module to enable annotation-based configuration.
+  Regardless of which modules you employ, using SST should feel like a natural extension of the
+  corresponding Spring projects.
+  
+* Spring project support
+
+  The following table lists the Spring projects supported by <<SST>> and the corresponding module(s)
+  to employ.
+  
+*-------------------------*--------------------------------------------------------------------*
+| <<Spring Project>>      | <<SST Module>>                                                     |
+*-------------------------+--------------------------------------------------------------------+
+| Spring Framework        | {{{./docs/guide/index.html#sst-core}sst-core}}                     |
+|                         | {{{./docs/guide/index.html#sst-web}sst-web}}                       |
+*-------------------------+--------------------------------------------------------------------+
+| Spring Data REST        | {{{./docs/guide/index.html#sst-data-rest}sst-data-rest}}           |
+*-------------------------+--------------------------------------------------------------------+
+| Spring Security         | {{{./docs/guide/index.html#sst-security}sst-security}}             |
+*-------------------------+--------------------------------------------------------------------+
+| Spring Web Flow         | {{{./docs/guide/index.html#sst-webflow}sst-webflow}}               |
+*-------------------------+--------------------------------------------------------------------+
+| Spring Web Services     | {{{./docs/guide/index.html#sst-ws}sst-ws}},                        |
+|                         | {{{./docs/guide/index.html#sstws-maven-plugin}sstws-maven-plugin}} |
+*-------------------------+--------------------------------------------------------------------+
+
+  Detailed information on the support provided for the various Spring projects can be found in the
+  {{{./docs/guide/index.html}SST user guide}}.
+  
+* Using SST
+
+  <<SST>> is designed to have a minimal footprint for both configuration and coding, making it
+  easy for developers to incorporate into their applications.  Full support for common Spring configuration
+  techniques such as custom XML namespaces and annotation-based configuration makes it possible to leverage
+  the power of <<SST>> with minimal changes to the application configuration.  
+  
+  Similarly, the various tools are designed to fit very naturally into coding practices commonly used in a
+  Spring-based application.  Whether exposed through dependency injection, aspect-oriented weaving, utility
+  classes or tag libraries, the <<SST>> tools afford clean interfaces and effective separation of concerns 
+  within the application code.
+  
+  The <<SST>> documentation provides a number of resources to help developers get up and running quickly:
+  
+  * {{{./docs/guide/index.html}User Guide}} - Detailed guidance and examples for using each of the tools in the toolkit.
+  
+  * {{{./docs/apidocs/index.html}API Reference}} - Consolidated Javadoc documentation for all <<SST>> classes.
+  
+  * {{{./styleGuide.html}SST StyleGuide}} - Annotated code examples illustrating how specific issues are
+  addressed within the <<SST>> code, itself.
+  
+  []
+
+  
+   
+
+  

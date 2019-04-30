@@ -1,0 +1,7 @@
+	<sgr:greeting>
+Hello {4},
+{3}
+
+Sincerely,
+{2}
+	</sgr:greeting>

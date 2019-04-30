@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2013 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<faqs xmlns="http://maven.apache.org/FML/1.0.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+  title="Frequently Asked Questions"
+  toplink="true">
+  
+	<part id="general">
+		<title>General Questions</title>
+		
+		<faq id="diversity">
+			<question>
+				Why does <b>SST</b> seem to be a mishmash of different kinds of unrelated 
+				tools?
+			</question>
+			<answer>
+				The tools in <b>SST</b> were harvested from a number of projects over a 
+				period of several years.  They arose organically from the needs of these 
+				projects, rather than being the result of a centralized planning effort.
+				As such, they represent the diversity of issues that tend to occur in
+				real-world software development using Spring.
+			</answer>
+		</faq>
+		
+		<faq id="learningCurve">
+			<question>
+				Won't introducing another set of non-standard tools just add one more thing
+				that the development team has to learn?
+			</question>
+			<answer>
+				<p>While this is always a concern when introducing a new technology, <b>SST</b>
+				is designed to fit very naturally into a project that already makes heavy
+				use of Spring.  The goal has been to ensure that the investment a team makes
+				in learning to use Spring will also allow them to quickly and easily get 
+				value from the tools in this toolkit.</p>  
+				
+				<p>Our experience in introducing <b>SST</b> to a variety of teams leads us 
+				to believe that the goal has been met. For example, developers seem to
+				find the <i>Transformation Framework</i> to be a very natural way to organize
+				and implement conversion code.  The things that we have seen teams struggle
+				with when using <b>SST</b> have generally been related more to the concepts
+				of well-structured, loosely-coupled design than the specifics of using
+				these tools.  Since it seems likely that a team making extensive use of 
+				Spring will ultimately have to wrestle with these issues, anyway, we don't
+				believe that introducing <b>SST</b> will lengthen the learning curve.</p>
+			</answer>
+		</faq>
+		
+		<faq id="alternatives">
+			<question>
+				Couldn't many of the same things be done natively in Spring without using this
+				toolkit?
+			</question>
+			<answer>
+			</answer>
+		</faq>
+		
+	</part>
+	
+	<part id="sst-core">
+		<title><b>sst-core</b> Module</title>
+		
+		<faq id="conversion">
+			<question>
+				Isn't the <b>SST Transformation framework</b> just a knockoff of the conversion service in Spring 3?
+			</question>
+			<answer>
+				<p>The Transformation framework was initially developed prior to the release of Spring 3
+				to meet the needs of projects that the SST developers were involved in.  Once the conversion
+				service was introduced, the developers felt that the <b>Transformation framework</b>
+				continued to fill a slightly different niche, for the following reasons:
+				<ul>
+					<li>The conversion service is used by the Spring container to support features such
+					as the Spring Expression Language.  The <b>Transformation framework</b> can be used
+					by an application without any unexpected impact on the behavior of the container.</li>
+					<li>The annotation-based approach used to configure the <b>Transformation framework</b>
+					promotes application modularity and simplifies dependency management.</li>
+					<li>The <b>Transformation framework</b> incorporates features such as object caching
+					that make it uniquely effective for domain-related transformations.</li>
+				</ul></p>
+				
+				<p>For these reasons, and a certain amount of justifiable pride in having already built 
+				something that Spring now considered valuable, the developers chose to preserve the
+				<b>Transformation framework</b> as part of <b>SST</b>.  Subsequent experience on multiple
+				projects seems to support this decision.</p>
+			</answer>
+		</faq>
+	</part>
+
+    <part id="deprecated">
+        <title>Features removed from prior versions</title>
+        
+        <faq id="simplelogginginterceptor">
+            <question>
+                What happened to the <code>SimpleLoggingInterceptor</code> in <b>sst-ws</b>?
+            </question>
+            <answer>
+                The <code>SimpleLoggingInterceptor</code> was designed to provide equivalent
+                functionality for <code>WebServiceTemplate</code> as <code>SoapEnvelopeLoggingInterceptor</code>
+                does for service endpoints.  However, it turns out that Spring Web Services
+                already includes full support, through debug and trace level log settings,
+                for logging both the message payload and full SOAP message for both client
+                and server interactions without the use of an interceptor (see <b>Message
+                Logging and Tracing</b> in the <i>Spring Web Services Reference Documentation</i>).
+                Consequently, <code>SimpleLoggingInterceptor</code> was redundant and has been
+                removed.
+            </answer>
+        </faq>
+        
+        <faq id="configurableconversionservice">
+        	<question>
+        		Why has the <code>ConfigurableConversionService</code> been removed from <b>sst-webflow</b>?
+        	</question>
+        	<answer>
+        		Recent versions of Spring Web Flow have switched to use the conversion
+        		framework introduced in Spring 3, rather than providing a separate conversion
+        		capability.  The Spring 3 conversion framework covers the gap in functionality
+        		that <code>ConfigurableConversionService</code> was designed to address, so
+        		<code>ConfigurableConversionService</code> was removed to avoid confusion.
+        	</answer>
+        </faq>
+                              
+    </part>
+
+</faqs>

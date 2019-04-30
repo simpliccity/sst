@@ -1,0 +1,4 @@
+http\://www.simpliccity.org/schema/sst/sst-0.2.0.xsd=org/simpliccity/sst/config/sst-0.2.0.xsd
+http\://www.simpliccity.org/schema/sst/sst-0.3.0.xsd=org/simpliccity/sst/config/sst-0.3.0.xsd
+http\://www.simpliccity.org/schema/sst/sst-1.0.0.xsd=org/simpliccity/sst/config/sst-1.0.0.xsd
+http\://www.simpliccity.org/schema/sst/sst.xsd=org/simpliccity/sst/config/sst-1.0.0.xsd

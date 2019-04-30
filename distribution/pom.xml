@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2009 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  	<modelVersion>4.0.0</modelVersion>
+  	<parent>
+  		<groupId>org.simpliccity.sst</groupId>
+  		<artifactId>sst</artifactId>
+  		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+  	</parent>
+  	<artifactId>distribution</artifactId>
+  	<packaging>pom</packaging>
+  	<name>SST Distributions</name>
+  	<description>${displayTitle} distribution assembly</description>
+
+	<dependencies>
+	
+		<!-- Internal dependencies -->
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>modules</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-core</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-core</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-data-rest</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-data-rest</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-jwt</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-jwt</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-security</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-security</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-web</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-web</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-webflow</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-webflow</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+		
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-ws</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sst-ws</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sstws-maven-plugin</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sstws-maven-plugin</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+		
+    	<dependency>
+	      	<groupId>${project.groupId}</groupId>
+	      	<artifactId>documentation</artifactId>
+	      	<version>${project.version}</version>
+	      	<classifier>docs</classifier>
+	      	<type>zip</type>
+    	</dependency>
+    	
+	</dependencies>
+	
+	<build>
+	
+		<finalName>${project.parent.artifactId}-${project.version}</finalName>
+		
+		<plugins>
+		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+	  			
+	  			<executions>
+	  				<execution>
+	  					<id>stage-binaries</id>
+	  					<phase>deploy</phase>
+	  					<goals>
+	  						<goal>single</goal>
+	  					</goals>
+	  					<configuration>
+	  						<outputDirectory>${binaryStagingDirectory}</outputDirectory>
+	  						<descriptors>
+	  							<descriptor>src/main/assembly/modulesDist.xml</descriptor>
+	  						</descriptors>
+	  						<tarLongFileMode>gnu</tarLongFileMode>
+	  						<!-- <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot> -->
+	  					</configuration>
+	  				</execution>
+	  				<execution>
+	  					<id>distribution</id>
+						<phase>post-site</phase>
+	  					<goals>
+	  						<goal>single</goal>
+	  					</goals>
+	  					<configuration>
+	  						<descriptors>
+<!-- 	  							<descriptor>src/main/assembly/dist.xml</descriptor> -->
+	  							<descriptor>src/main/assembly/dist.xml</descriptor>
+	  						</descriptors>
+	  						<tarLongFileMode>gnu</tarLongFileMode>
+	  						<!-- <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot> -->
+	  					</configuration>
+	  				</execution>
+	  			</executions>
+			</plugin>
+
+			<!-- Enable deployment of distribution artifacts when building for distribution only -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>site-deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+						<configuration>
+							<skip>false</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+		</plugins>
+		
+	</build>
+
+ 	<reporting>
+		<excludeDefaults>true</excludeDefaults>
+	</reporting>
+	
+</project>

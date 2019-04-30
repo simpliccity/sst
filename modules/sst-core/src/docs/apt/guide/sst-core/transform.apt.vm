@@ -1,0 +1,406 @@
+ -----
+ ${displayTitle} Transformation Framework
+ -----
+ Kevin Fox
+ -----
+ 2014-05-27
+ -----
+
+ ~~    Copyright 2013 Information Control Corporation
+ ~~
+ ~~ Licensed under the Apache License, Version 2.0 (the "License");
+ ~~ you may not use this file except in compliance with the License.
+ ~~ You may obtain a copy of the License at
+ ~~
+ ~~     http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing, software
+ ~~ distributed under the License is distributed on an "AS IS" BASIS,
+ ~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ~~ See the License for the specific language governing permissions and
+ ~~ limitations under the License.
+
+ ~~ NOTE: For help with the syntax of this file, see:
+ ~~ http://maven.apache.org/doxia/references/apt-format.html
+
+${displayTitle} Transformation Framework
+
+  With the prevalent emphasis in Java circles on <Separation of Concerns> and <Loose Coupling>, most developers know by now that it is bad form
+  to add a <<<toXML()>>> method to a domain object that must be converted to an XML representation.  But given how difficult it is to find a more
+  appropriate place to put the conversion code, how cumbersome it can be to use it and how frequently this situation arises, in one form or another,
+  it sure is tempting.
+
+  The <<SST Transformation Framework>> is designed to remove this temptation.  By making it mind-numbingly simple to write and use modular, loosely-coupled
+  custom conversion code (called transformations), the framework encourages developers to stick to good design principles.  At the same time, the framework 
+  handles some common issues that the developer is likely to overlook.
+  
+  Because the framework is meant to be easy to use, it doesn't attempt to be another data mapping tool.  The developer is still responsible for
+  writing the actual code that converts between one type and another (basic get/set calls are just fine).  But there are no special interfaces to implement,
+  no configuration files to update in order for the transformation to be recognized and only one simple line of code needed to perform the conversion.
+  
+  The following sections describe how to setup the framework, how to call it and how to write transformations.  It really is that simple.  And just in case
+  things do manage to get a little complicated, some special considerations have been identified to help sort them out.
+
+%{toc|section=1|fromDepth=2|toDepth=3}
+
+* Configuring the Transformation Framework
+
+  The <<Transformation Framework>> is meant to fit very naturally into a Spring application.  The main controller class, <<<Transformer>>>, is a Spring bean and
+  can be defined as such in the application context.  In keeping with the theme of making things simple, though, the framework also defines a custom namespace 
+  that can be used to do the heavy lifting of setting up the framework.  
+  
+  Follow the steps of the {{Basic Configuration}} to get up and running quickly.  This setup should work for most applications.  If you run into any problems
+  with this configuration, check out the {{Advanced Configuration}} for information that will allow you to fine tune the behavior of the <<Transformation Framework>>.
+
+** Basic Configuration
+
+  [[1]] To use the custom namespace in an application context configuration file, first add the namespace definition to the <<<\<beans\>>>> tag at the top of the file:
+  
+    \[text:ComplexTransformationCacheJoinIT.xml:xml! customNamespace \]
+ 
+    Notice, the definition of the <<sst>> namespace and the corresponding entry in the <<<schemaLocation>>>.  The XSD file for the namespace is bundled in the
+    <<<sst-core>>> JAR file, along with the rest of the <<Transformation Framework>>, so this must be included on the application classpath.
+  
+  [[2]] The framework relies on Spring's component autodetection to locate custom transformations.  Use the following two lines to configure it:
+  
+    \[text:ComplexTransformationCacheJoinIT.xml:xml! scanConfig \]
+ 
+    <Be sure to add the necessary application package(s) in the> <<<base-package>>> <attribute (the list is comma-separated) so that the transformations can be
+    found.>
+  
+  [[3]] Finally, to configure the <<<Transformer>>> bean, add the following line:
+
+    \[text:ComplexTransformationCacheJoinIT.xml:xml! transformerConfig \]
+
+  []
+  
+** Advanced Configuration
+
+  The <<<\<sst:transformer\>>>> tag supports a number of attributes that configure the object caching behavior of the <<<Transformer>>>.  See the section on 
+  {{Configuring cache behavior}} for further information.
+  
+  The <<<Transformer>>> bean defined by the <<<\<sst:transformer\>>>> tag is named <sstTransformer>.  Other supporting beans named <sstTransformationCacheManager>, 
+  <sstBeanMetadataLookupManager> and <sstBeanMetadataLookupStrategy> are defined, as well.  Be sure not to define any beans that use these names.
+  
+  If for some reason you prefer to directly configure the <<<Transformer>>> bean, rather than relying on the custom namespace, see the
+  {{{../../apidocs/org/simpliccity/sst/transform/Transformer.html}Transformer javadoc}} for information on the configurable properties.
+
+* Invoking the Transformation Framework
+
+  As mentioned, the framework is intended to be really easy to use.  Because it is meant to work with Spring, you do need to get a Spring bean,
+  but that is already simple.  Beyond that, it only takes one method call.
+  
+** Wiring the <<<Transformer>>>
+
+  To use the framework, you need an instance of the <<<Transformer>>> bean.  Any means of getting a Spring bean will work, but the easiest is to
+  use autowiring.  Add the following attribute to any class that needs to use the framework:
+
+ \[jc:org.simpliccity.sst.transform.TransformerIT:--- UserGuide transform ---\]
+ 
+  For those that care, the <<<Transformer>>> is a singleton.  See the {{{../../apidocs/org/simpliccity/sst/transform/Transformer.html}Transformer javadoc}}
+  for more information on this class.
+ 
+** Calling the <<<Transformer>>>
+
+  The <<<transform()>>> method of the <<<Transformer>>> bean is used to convert the source object to an instance of the specified target class, as illustrated
+  in the following code snippet.
+  
+ \[jc:org.simpliccity.sst.transform.ComplexTransformationCacheJoinIT:--- UserGuide callTransform ---; highlight -ughighlight-\]
+ 
+  The <<Transformation Framework>> will handle all of the complexity of locating and applying the appropriate transformation logic.  If the framework
+  cannot perform the transformation, for any reason, it will fail quietly and return a <<<null>>> value.
+
+* Creating Transformations
+
+  The real magic of the <<Transformation Framework>> is this ability to automatically locate transformation classes and select the appropriate one to
+  employ for a particular conversion.  Both of these capabilities are based on the simple expedient of using annotations to mark a transformation class.
+  By tying directly into Spring's support for component autodetection (i.e. annotation scanning), the framework is able to uniquely identify beans
+  derived from classes thus marked so that they can be easily retrieved as needed based on the intended source and target types for a conversion.  The
+  framework relies on the {{{./bean_name.html}SST Bean Naming Framework}} and the {{{./metadata_lookup.html}SST Bean Metadata Lookup Framework}} to
+  provide the needed integration with the Spring application context.
+  
+  Since the framework manages all of the complicated plumbing under the covers, the developer need do very little to implement a transformation.  Any
+  class that can serve as a Spring bean can be used as a transformation when marked with the appropriate annotations.  The following sections describe
+  the conventions for applying the small set of annotations used by the <<Transformation Framework>>.
+  
+** The <<<@Transformation>>> annotation
+
+  A conversion can be thought of as an ordered pair of Java types.  For example, the notation (<TypeA>, <TypeB>) would indicate a conversion of an object
+  of <TypeA> to one of <TypeB>.  The <<Transformation Framework>> annotations provide an easy way to specify that a bean class supports either a single 
+  conversion or a pair of related conversions.  Knowing which conversion(s) a class supports allows the framework to correctly employ the appropriate 
+  class as needed to transform an object from one type to another.  
+  
+  In order for a class to be recognized as implementing a transformation, it must be marked with the class-level <<<@Transformation>>> annotation, as 
+  illustrated below.
+  
+ \[jc:org.simpliccity.sst.transform.ComplexTestTransformer:--- UserGuide transformation ---; highlight -ughighlight-\]
+
+  The three required attributes of this annotation together define one or more conversions (ordered pairs of types) supported by the class.  The attributes are:
+  
+  [source] The class supported as the source of a conversion
+  
+  [target] The class supported as the target of a conversion
+  
+  [direction] The direction of conversion supported by this class
+  
+  [] 
+  
+  The options available for the <<<direction>>> attribute include:
+  
+  [OUT] From <source> to <target>
+    
+  [IN] From <target> to <source>
+    
+  [BIDIRECTIONAL] Both <source> to <target> and <target> to <source>
+    
+  []
+  
+  The following table illustrates how the combination of these attributes are mapped to conversions, using the types from the example above:
+  
+*----------------------------------*-----------------------------------*----------------------*-----------------------------------------------------------------------*
+| <<source>>                       | <<target>>                        | <<direction>>        | <<Supported Conversion(s)>>                                           |
+*----------------------------------+-----------------------------------+----------------------+-----------------------------------------------------------------------+
+| <<<ComplexTransformationInput>>> | <<<ComplexTransformationResult>>> | <OUT>                | (<<<ComplexTransformationInput>>>, <<<ComplexTransformationResult>>>) |
+*----------------------------------+-----------------------------------+----------------------+-----------------------------------------------------------------------+
+| <<<ComplexTransformationInput>>> | <<<ComplexTransformationResult>>> | <IN>                 | (<<<ComplexTransformationResult>>>, <<<ComplexTransformationInput>>>) |
+*----------------------------------+-----------------------------------+----------------------+-----------------------------------------------------------------------+
+| <<<ComplexTransformationInput>>> | <<<ComplexTransformationResult>>> | <BIDIRECTIONAL>      | (<<<ComplexTransformationInput>>>, <<<ComplexTransformationResult>>>) |
+|                                  |                                   |                      | <and>                                                                 |
+|                                  |                                   |                      | (<<<ComplexTransformationResult>>>, <<<ComplexTransformationInput>>>) |
+*----------------------------------+-----------------------------------+----------------------+-----------------------------------------------------------------------+
+
+  Note that the framework will only recognize a single implementation of a conversion (an ordered pair of types as described above) across the entire 
+  application.  Behavior is undefined if classes are found on the classpath with <<<@Transformation>>> annotations that specify overlapping conversions.
+  
+  The framework makes no assumptions about which conversions will be provided.  In particular, while the annotations allow a developer to easily define
+  bidirectional conversions between a pair of types, using either a single <<<BIDIRECTIONAL>>> transformation or paired <<<IN>>>/<<<OUT>>> transformations as
+  preferred, the framework does not require this.  This gives the developer ultimate flexibility when deciding what conversions to implement and how to 
+  package them.
+
+** The <<<@InTransform>>> and <<<@OutTransform>>> annotations
+
+  While the <<<@Transformation>>> annotation alerts the framework that a particular class can be used to perform a conversion, it is also necessary
+  to tell it how to actually do so.  The framework does not require a transformation class to implement any particular interface or follow any naming
+  convention for methods.  Instead, the method used to perform a particular transformation must be marked with either the <<<@OutTransform>>>
+
+ \[jc:org.simpliccity.sst.transform.ComplexTestTransformer:--- UserGuide outTransform ---; highlight -ughighlight-\]
+ 
+  or <<<@InTransform>>> 
+
+ \[jc:org.simpliccity.sst.transform.ComplexTestTransformer:--- UserGuide inTransform ---; highlight -ughighlight-\]
+ 
+  annotation, depending on the direction of the supported conversion.
+  
+  Note that, while the name of the method is immaterial to the framework, it's signature must follow the convention that it accept a single parameter of
+  the source type and return the target type.  Also note that the method annotation used must match the <<<direction>>> attribute of the <<<@Transformation>>>
+  annotation.  That is: 
+  
+  * a class defined as an <<<OUT>>> transformation must have a method marked with <<<@OutTransform>>>
+  
+  * a class defined as an <<<IN>>> transformation must have a method marked with <<<@InTransform>>>
+  
+  * a class defined as a <<<BIDIRECTIONAL>>> transformation must have one method marked with <<<@OutTransform>>> and another marked with <<<@InTransform>>>
+  
+  []
+  
+  As previously mentioned, the framework makes no assumptions about the logic within the designated method(s).  The developer is free to implement a conversion
+  in any manner desired.  By observing a strict separation of concerns, the framework is able to act as a front-end to the transformation process while allowing the
+  developer to use familiar tools and approaches to implement conversion logic.  Whether employing simple get/set logic, Spring bean utilities or a third-party
+  data mapping tool (or a mix of all three) to carry out conversions, the application can still benefit from the ease of use, single point of access and clarity 
+  of expression provided by the <<Transformation Framework>>.
+
+* Special Considerations
+
+  The following sections supplement the basic framework documentation by addressing several special cases that can arise.  The information presented here is not required
+  to use the core functionality of the <<Transformation Framework>>; however, it can be useful when tailoring the capabilities of the framework to the specific needs of
+  an application. 
+   
+** Shallow vs. Deep Transformations
+
+  While the framework, itself, is agnostic to the nature of the transformation logic implemented in the <<<@Transformation>>> classes, there are some practical considerations
+  that the developer must take into account in order to get the expected outcome.  The most basic of these is to consider the difference between <shallow> and <deep> transformations.
+  
+  A <shallow> transformation would convert only the source object itself to the specified target type.  Relationships to non-scalar types in the source object may or may not be 
+  preserved in the resulting object.  Regardless, no attempt would be made to transform any related objects.
+  
+  On the other hand, a <deep> transformation would treat the source object as the root of an object graph for it to traverse.  Each object in the graph would be expected to be transformed 
+  appropriately, as well, resulting in a parallel transformed graph.  Even though these are more complex to implement, this is often the desired behavior for a transformation.
+  
+  Although the developer will not find explicit support for managing <shallow> and <deep> transformations in the framework, the framework itself implicitly simplifies 
+  the coding of both.  In the case of the <shallow> transformation, the very lack of any requirement to differentiate between the two at the framework level reduces the 
+  implementation complexity.  Alternately, when coding a <deep> transformation, the developer can take advantage of the framework to break it down into a set of much simpler
+  classes that convert individual types.  
+  
+  Since each transformation class is a Spring bean, it can be wired with a reference to the <<<Transformer>>> (see {{Wiring the Transformer}}).  This allows the transformation
+  class to use the framework recursively to transform any related objects, as illustrated in the following code snippet from within a transformation class.
+
+ \[jc:org.simpliccity.sst.transform.ComplexTestTransformer:--- UserGuide recursiveTransform ---; highlight -h1-\]
+  
+  Not only does this approach allow for modular code, it effectively leverages the object caching facility of the framework to preserve object identity across the transformation,
+  as described in the next section.
+  
+** Object Caching
+
+  As previous sections indicate, the <<Transformation Framework>>, itself, is largely responsible for coordinating the transformation process, not for actually converting objects 
+  from one type to another.  Custom transformation classes handle the details of the conversions.  The framework does, however, provide one facility that is directly involved
+  in the conversion process: object caching.
+  
+  Since the {{Basic Configuration}} described here enables this feature, users may want to browse the following topics to understand what it is used for and how to control it.
+  
+*** Rationale for caching
+
+  Caching is often used as a means to improve system or application performance.  In the case of the <<Transformation Framework>>, however, it is employed instead as a way to
+  simplify the coding of <deep> transformations (see the {{Shallow vs. Deep Transformations}} topic).
+  
+  When recursively walking an object graph, as would be required for a <deep> transformation, the transformation code may encounter the following situation:
+  
+[../../images/reference_cycle.png] Reference cycle
+
+  In this scenario, both the transformation for <<<ClassA>>> and that for <<<ClassB>>> will invoke a call to the transformation framework with the same <<<ClassC>>> instance as the  
+  source object and with, presumably, the same target class.  In the normal course of affairs, the expected behavior would be that both calls should return the same result object,
+  in order to preserve the cycle in the resultant transformed object graph.
+   
+[../../images/transform_cycle.png] Transformation preserves identity
+  
+  Otherwise, the instances of <<<ClassA'>>> and <<<ClassB'>>> will have relationships with two different instances of <<<ClassC'>>>.  Depending on the application, this could result
+  in undesirable (and hard to troubleshoot) behavior.
+
+[../../images/broken_cycle.png] Identity not preserved
+
+  Unless <<<ClassC'>>> is a <Flyweight>, trying to resolve this in the transformation for <<<ClassC>>> would get ugly.  On the second call to this transformation, it would have to 
+  "remember" that it had previously transformed this particular instance and be sure to return the exact same result, rather than another separate instance of the target class.
+  This would certainly violate the fundamental design goal of the <<Transformation Framework>>: that it be very easy for a developer to use.  
+  
+  Instead, the framework takes the responsibility for ensuring that the same result object is returned by both transformation calls.  It does so by caching objects that have been 
+  transformed and pulling results from the cache, rather than executing a new transformation, when the same combination of source class, target class and source object are recognized.
+  This is completely transparent to both the framework client and the transformation classes.  
+
+*** Controlling cache scope
+
+  As helpful as object caching is for implementing <deep> transformations, it is crucial to place boundaries on its use.  For example, imagine a situation where an object has been
+  transformed once, modified and transformed again.  If object caching were used without any constraint, both transformations would return the identical result object, which would
+  not reflect the updates made to the source in the interim.  Clearly, caching is only of value in a context in which the source object would not be expected to change between
+  subsequent attempts to transform it.
+  
+  While this might seem sufficiently limiting to bring the usefulness of object caching into question, it is exactly the behavior needed to implement a <deep> transformation.  In that case,
+  the state of the source object graph can reasonably be considered to be fixed for the duration of the transformation.  Therefore, all attempts to transform a particular source object
+  <should> result in identical results, as described above.  At the same time, it is important for the framework to cleanup any cached objects when the <deep> transformation ends, so that
+  future transformations correctly reflect changes to the state of source objects.  
+  
+  In many ways, the desired behavior for a <deep> transformation with caching is similar in nature to a database transaction.  And just as a developer must define the boundaries of a
+  transaction, in order that the database know what updates to include, so the developer of a set of transformations needs to specify the scope of their participation in object caching.
+  
+  As with all things in the <<Transformation Framework>>, controlling cache scope is designed to be excruciatingly simple.  In the main, this is done with the optional <<<cache>>> attribute 
+  of the <<<@Transformation>>> annotation used to mark the transformation class. The available options are:
+  
+  [DEFAULT] Uses the default cache mode specified for the <<<Transformer>>>
+  
+  [NONE] The transformation does not participate in caching, either in retrieving or setting the value from/to the cache
+  
+  [JOIN] The transformation uses the existing cache context, retrieving or setting the value from/to the cache
+  
+  [FLUSH] The transformation uses the existing cache context but flushes it upon completion
+  
+  []
+  
+  If the <<<cache>>> attribute is not specified, <<<DEFAULT>>> is used.
+  
+  When using the {{Basic Configuration}} described above, the following two guidelines will correctly define transformation cache scope for the majority of cases:
+  
+  * For transformations that apply to the root of an object graph, use <<<cache=FLUSH>>>.
+
+ \[jc:org.simpliccity.sst.transform.DeepTestTransformer:--- UserGuide deepTransformRoot ---\]
+  
+  * For all other transformations, omit the <<<cache>>> attribute (this implies a setting of <<<DEFAULT>>>, which is defined by the configuration to be <<<JOIN>>>).
+
+ \[jc:org.simpliccity.sst.transform.TestValueTransformer:--- UserGuide deepTransformLeaf ---\]
+  
+  []
+  
+  When a <deep> transformation, that is one on the root of an object graph, is initiated, the cache setting of <<<FLUSH>>> will cause it to participate in caching.  Recursive calls to 
+  transform child objects will use transformations that have an effective setting of <<<JOIN>>>, which will also participate in caching.  Upon completion of the root transformation, the 
+  previously mentioned cache setting of <<<FLUSH>>> will cause the desired cleanup of the cache.
+  
+  Of course, there are scenarios for which controlling cache scope is more intricate.  For example, a particular class may potentially appear either as a root node or a leaf node for various 
+  object graphs.  In this case, using a cache setting of <<<FLUSH>>> on the corresponding transformation to statically define cache cleanup may not give the desired behavior.  Instead, it may 
+  be more productive to set that transformation to <<<JOIN>>> and manually trigger a flush with a variant of the <<<transform()>>> call when the object is the root of the graph.  
+
+ \[jc:org.simpliccity.sst.transform.ComplexTransformationCacheJoinIT:--- UserGuide manualFlush ---\]
+  
+  See the {{{../../apidocs/org/simpliccity/sst/transform/Transformer.html}Transformer javadoc}} for more information on the <<<transform()>>> options.
+
+  Another such scenario can occur when transforming a collection of similar objects.  Even though each item in the collection represents its own object graph, it is not unusual for such graphs
+  to contain common children.  In this case, the need to maintain object identity, which caching addresses, applies across the entire collection.  If the collection class used is unique enough
+  to warrant its own transformation, the guidelines above should be sufficient.  However, if a generic collection class is being employed, a slightly different approach is required:
+  
+  * Mark the transformations for the classes in the collection to <<<JOIN>>> caching.
+  
+  * When looping through the collection to transform the individual members, use the standard version of the <<<transform()>>> method to avoid flushing the cache.
+  
+  * Upon completion of the loop, use the transformer's cache manager to flush the cache.
+  
+  []
+  
+ \[jc:org.simpliccity.sst.transform.ComplexTransformationCacheJoinIT:--- UserGuide cacheManagerFlush ---\]
+  
+
+*** Configuring cache behavior
+
+  The <<<transformer>>> element of the custom <<SST>> Spring configuration namespace provides several optional attributes that can be used to tweak the behavior of the object cache to meet an 
+  application's particular needs.
+  
+  [disableCache] Disables use of object caching by the <<Transformation Framework>>.  This supersedes any cache scope settings on individual transformations and other cache settings on the
+  <<<transformer>>> element.  Defaults to <<<false>>>.  Note that disabling caching may cause unexpected results when implementing <deep> transformations.
+  
+  [defaultCacheMode] Defines the default cache scope setting to apply to transformations.  See above for available settings.  Defaults to <<<NONE>>> to maintain compatibility with versions prior
+  to the implementation of caching.
+  
+  [globalCacheScope] Specifies whether to use a single global cache or a cache per thread.  The latter is likely more appropriate for common uses (e.g. web applications).  Defaults to <<<false>>>
+  (i.e. cache per thread).
+  
+  [cacheFactory] Specifies a reference to a Spring bean used by the cache manager to retrieve instances of the cache.  This bean serves as an adapter to allow the cache manager to use an alternate
+  cache implementation.  The framework provides a default cache implementation, so this value should only be set if there is a compelling reason to leverage a different one.  See the
+  {{{../../apidocs/org/simpliccity/sst/transform/cache/TransformationCacheFactory.html}TransformationCacheFactory javadoc}} for further information.
+  
+  []
+
+*** Generating the cache index
+
+  By default, the index key under which a target object will be cached is the source object, itself.  In most cases, this will result in the desired behavior, since the source
+  object can be used to retrieve the corresponding target object from the cache.  However, there may be some instances in which this will not give the intended result (e.g. if a class can
+  have two instances that are functionally equivalent without satisfying the constraint for object equality).  The <<Transformation Framework>> addresses this by allowing the developer to define
+  custom methods to generate the cache index for an object undergoing either inbound or outbound transformation. 
+   
+  The <<<@InTransformCacheIndex>>> and <<<@OutTransformCacheIndex>>> annotations can be used to mark methods on a transformation class that will be used to generate the cache index of inbound
+  and outbound transformations, respectively.  Similar conventions apply to the methods marked with these annotations as for those marked with {{The <<<@InTransform>>> and <<<@OutTransform>>> annotations}}.
+  
+** Dependencies and Packaging
+
+  One of the least obvious, yet most helpful, benefits of the <<Transformation Framework>> approach is that it can serve to simplify the dependencies within an application.  Because no client code, even
+  other transformations, ever directly references a transformation class, there are no compile-time dependencies on it.  This allows a high degree of flexibility in packaging the transformation code.
+  
+  Only a few points need be kept in mind:
+  
+  * Transformation classes must appear on the runtime classpath.
+  
+  * All packages containing transformation classes must be listed, either explicitly or implicitly via a parent package, in the <<<base-package>>> attribute of the <<<\<context:component-scan\>>>> tag used
+  to configure Spring annotation scanning.  See {{Basic Configuration}} for details.
+  
+  * Transformation classes will have compile-time dependencies on their corresponding source and target classes.  Define the project dependencies accordingly.
+  
+  []
+
+** Integrating with Other Conversion Frameworks
+
+  As previously stated, the <<Transformation Framework>> has no pretensions to be a full-fledged data mapping tool or complex type conversion system, nor does it attempt to take the place of these.
+  What it does do is provide a specific set of benefits (see the intro) while playing nice with pretty much any other framework a developer may want to use to implement conversions.  Obviously,
+  there is some amount of extra work involved to setup the integration with another framework, but this should be small enough to make this approach worth considering.
+  
+  The primary requirement is that there be an annotated transformation class for each conversion (or pair of related conversions) supported.  When working with a third-party framework, it may well be
+  possible to centralize integration logic into an abstract base class that each of the transformation classes would extend.  The transformation methods (marked with <<<@OutTransform>>> or <<<@InTransform>>>)
+  could then delegate the bulk of the work to common methods defined on the base class.  Alternately, it would be sufficient to refactor any existing conversion code into the individual transformation classes.
+  
+  The only configuration change that may be needed when integrating with another framework would be to disable object caching.  Depending on the framework, caching may not only be superfluous but may lead to
+  some undesirable results.  See {{Configuring cache behavior}} for details on how to turn off caching.
+
+

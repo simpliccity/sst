@@ -1,0 +1,7 @@
+analyseLocally=false
+eclipse.preferences.version=1
+projectArtifactId=sst-data-rest
+projectBranch=
+projectGroupId=org.simpliccity.sst
+serverUrl=http\://sonar.icc.local\:9000
+version=1

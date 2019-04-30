@@ -1,0 +1,61 @@
+<!--
+
+    Copyright 2011 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:sst="http://www.simpliccity.org/schema/sst"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.simpliccity.org/schema/sst http://www.simpliccity.org/schema/sst/sst.xsd">
+
+	<bean id="embeddedDB" class="org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean">
+		<property name="databaseType" value="HSQL" />
+		<property name="databaseName" value="propertiesDb" />
+		<property name="databasePopulator">
+			<bean class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator">
+				<property name="scripts">
+					<util:list>
+						<value>classpath:sql/PropertiesTest.sql</value>
+					</util:list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+<!-- propertyConfig -->
+	<bean id="jdbcPropertyLoader" class="org.simpliccity.sst.property.JdbcPropertyLoader">
+		<property name="jdbcTemplate">
+			<bean class="org.springframework.jdbc.core.JdbcTemplate">
+				<property name="dataSource" ref="embeddedDB" />
+			</bean>
+		</property>
+		<property name="keyColumnName" value="property_name" />
+		<property name="valueColumnName" value="property_value" />
+		<property name="sqlQuery" value="select property_name, property_value from sst_properties;" />
+	</bean>
+	
+	<sst:property loader="jdbcPropertyLoader" />
+
+<!-- propertyConfig -->
+
+	<bean id="valueHolder" class="org.simpliccity.sst.property.ValueHolder">
+		<property name="value" value="${testURL}" />
+	</bean>
+</beans>

@@ -1,0 +1,168 @@
+ -----
+ ${displayTitle} User Guide
+ -----
+ Kevin Fox
+ -----
+ 2015-02-16
+ -----
+
+${displayTitle} User Guide
+
+  This user guide provides a brief overview of the various tools in the <<SST>> toolkit
+  and links to detailed guidance to help developers incorporate them into their applications.
+
+%{toc|section=1|fromDepth=2|toDepth=3}
+  
+* sst-core
+
+  This module provides capabilities that may be applicable to any project using the core 
+  {{{http://projects.spring.io/spring-framework/}Spring Framework}}.
+
+** Bean Naming Framework
+
+  The {{{./sst-core/bean_name.html}Bean Naming Framework}} provides several extensions to 
+  Spring's support for automatically naming beans, especially as relates to component autodetection
+  (i.e. annotation scanning).  In particular, the framework makes it possible to use individual
+  naming schemes for different component types and to partition beans into namespaces.  This
+  capability is used internally to enable other <<SST>> frameworks.
+  
+** Bean Metadata Lookup Framework
+
+  Spring includes a robust facility to fine tune the static injection of beans through the
+  metadata provided by qualifiers.  However, no such capability is available when dynamically
+  retrieving beans from the application context.  The {{{./sst-core/metadata_lookup.html}Bean Metadata Lookup Framework}}
+  provides a configurable mechanism to dynamically lookup Spring beans by metadata attributes,
+  without specifically knowing the name of the desired bean.  This capability is used internally
+  to enable other <<SST>> frameworks.
+
+** Transformation Framework
+
+  The {{{./sst-core/transform.html}Transformation Framework}} provides a simple, clean mechanism
+  to convert data from one type of bean to another.  Using the framework, developers can easily
+  separate transformation code from bean definitions and business logic, while any available
+  transformation can be performed with a single call.  Unlike Spring's own data conversion
+  facility, transformations are identified solely through annotations, without the need to
+  implement specific interfaces or to statically register conversion beans.  
+  
+  The framework is designed to keep things simple for the developer, yet it incorporates 
+  a number of powerful features that fully leverage the capabilities of Spring and <<SST>>:
+  
+  * Includes a custom Spring namespace to configure the framework with minimal entries in
+  the application context configuration
+  
+  * Auto-detects custom transformations at application context load
+  
+  * Auto-selects the appropriate transformation to use based on the source and target types
+  
+  * Preserves object identity within the scope of a transformation using configurable result
+  caching
+  
+  []
+
+** Property Framework
+
+  The {{{./sst-core/property.html}Property Framework}} provides an extension of Spring's capabilities to 
+  use externalized properties when configuring bean definitions that predates the Unified Property Management
+  support introduced in Spring 3.1.  This framework supports additional property sources, such as database queries, 
+  and the ability to combine sources into a hierarchy.
+  
+** <sst-core> Maven dependency
+
+  Use the following settings to add <sst-core> to your Maven project.
+  
++---
+<dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>sst-core</artifactId>
+    <version>${project.version}</version>
+</dependency>
++---
+  
+* sst-int
+
+  This module is specifically designed for use with the {{{http://projects.spring.io/spring-integration/}Spring Integration}}
+  project.
+
+** <sst-int> Maven dependency
+
+  Use the following settings to add <sst-int> to your Maven project.
+  
++---
+<dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>sst-int</artifactId>
+    <version>${project.version}</version>
+</dependency>
++---
+  
+* sst-ws
+
+  This module is specifically designed for use with the {{{http://projects.spring.io/spring-ws/}Spring Web Services}}
+  project.
+
+** Access Control Framework
+
+ The web service {{{./sst-ws/access_control.html}Access Control Framework}} provides an annotation-based mechanism to
+ define access control restrictions on payload content for Sping Web Service endpoints.  This is intended to supplement
+ other security measures by, for example, ensuring that the user placing a web service call actually has access to an
+ entity referenced in the request message.  By pushing such security checks into the access control framework, developers
+ no longer need to implement them in the business logic of the service endpoint.  Such separation of concerns makes both the
+ web service and the security code more reusable and more adaptable.
+
+** <sst-ws> Maven dependency
+
+  Use the following settings to add <sst-ws> to your Maven project.
+  
++---
+<dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>sst-ws</artifactId>
+    <version>${project.version}</version>
+</dependency>
++---
+
+  <sst-core> will be added as a transitive dependency.
+  
+* sst-webflow
+
+  This module is specifically designed for use with the {{{http://projects.spring.io/spring-webflow/}Spring Web Flow}}
+  project.
+
+** Validator Adapter
+
+  The web flow {{{./sst-webflow/validator.html}Validator Adapter}} provides a simple mechanism to use JSR-303 Java Bean Validation with
+  the Spring Web Flow convention for model validation. 
+
+** FlowHelper Utility
+  
+  The {{{./sst-webflow/utilities.html}FlowHelper Utility}} provides general-purpose functions of use with Spring Web Flow.
+  
+** Configuration Tag Library
+
+  The {{{./sst-webflow/configuration.html}Configuration JSP Tag Library}} provides simple UI support for editing configurable
+  properties.
+
+** <sst-webflow> Maven dependency
+
+  Use the following settings to add <sst-flow> to your Maven project.
+  
++---
+<dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>sst-webflow</artifactId>
+    <version>${project.version}</version>
+</dependency>
++---
+
+  <sst-core> will be added as a transitive dependency.
+  
+* sstws-maven-plugin
+
+** Maven Plugin
+
+  The {{{./sstws-maven-plugin/plugin.html}sstws Maven plugin}} provides build support for Spring Web Services.  It includes the following goals:
+  
+  * {{{./sstws-maven-plugin/generateWSDL.html}generateWSDL}} - An adaptation from the Codehaus <springws-maven-plugin>, this goal generates a
+  WSDL file from a Spring Web Services WsdlDefinition.
+  
+  []

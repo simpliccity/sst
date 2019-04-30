@@ -1,0 +1,119 @@
+<!--
+
+    Copyright 2013 Information Control Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ 
+-->
+<!-- customNamespace -->
+<beans xmlns="http://www.springframework.org/schema/beans" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:security="http://www.springframework.org/schema/security"
+		xmlns:sws="http://www.springframework.org/schema/web-services"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:sst="http://www.simpliccity.org/schema/sst"
+		xmlns:sstws="http://www.simpliccity.org/schema/sstws"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+			http://www.springframework.org/schema/web-services http://www.springframework.org/schema/web-services/web-services.xsd			
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+			http://www.simpliccity.org/schema/sst http://www.simpliccity.org/schema/sst/sst.xsd
+			http://www.simpliccity.org/schema/sstws http://www.simpliccity.org/schema/sst/sstws.xsd">
+<!-- customNamespace -->
+
+<!-- scanConfig -->
+	<context:annotation-config />
+	<context:component-scan base-package="org.simpliccity.sst" name-generator="org.simpliccity.sst.bean.annotation.PropertiesDelegateAnnotationBeanNameGenerator" />
+<!-- scanConfig -->
+
+<!-- metadataLookupConfig -->
+
+	<sst:lookup />
+
+<!-- metadataLookupConfig -->
+
+<!-- swsConfig -->
+
+	<sws:annotation-driven marshaller="jaxbMarshaller" unmarshaller="jaxbMarshaller" />
+	
+	<sws:interceptors>
+		<ref bean="loggingInterceptor" />
+		<ref bean="authenticationValidator" />
+		<ref bean="domainAccessValidator" />
+	</sws:interceptors>
+
+<!-- swsConfig -->
+	
+	<bean id="jaxbMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="contextPaths">
+			<list>
+				<value>org.simpliccity.sst.ws.endpoint.security.schema</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Interceptors  -->
+	
+	<bean id="loggingInterceptor" class="org.springframework.ws.soap.server.endpoint.interceptor.SoapEnvelopeLoggingInterceptor" />
+	
+	<bean id="authenticationValidator" class="org.springframework.ws.soap.security.wss4j.Wss4jSecurityInterceptor" >
+		<property name="validationActions" value="UsernameToken" />
+		<property name="validationCallbackHandler" ref="authenticationCallbackHandler" />
+	</bean>
+	
+	<bean id="authenticationCallbackHandler" class="org.springframework.ws.soap.security.wss4j.callback.SpringSecurityPasswordValidationCallbackHandler">
+		<property name="userDetailsService" ref="userService" />
+	</bean>
+	
+<!-- accessInterceptor -->
+
+	<bean id="springSecurityHandler" class="org.simpliccity.sst.security.service.SpringSecurityServiceSecurityHandler" />
+	
+	<sstws:access id="domainAccessValidator" securityHandlerRef="springSecurityHandler" />
+
+<!-- accessInterceptor -->
+	
+<!-- customSecurityHandler -->
+
+	<sstws:access id="noopDomainAccessValidator" securityHandlerRef="noopEndpointSecurityHandler" />
+	
+	<bean id="noopEndpointSecurityHandler" class="org.simpliccity.sst.ws.endpoint.security.NoopEndpointSecurityHandler" />
+
+<!-- customSecurityHandler -->
+	
+	<!-- Security configuration -->
+	
+	<security:global-method-security secured-annotations="enabled" />
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider user-service-ref="userService" />
+	</security:authentication-manager>
+	<security:user-service id="userService">
+		<security:user name="userA" password="password" authorities="ROLE_USER"/>
+		<security:user name="userB" password="password" authorities="ROLE_USER"/>
+		<security:user name="userC" password="password" authorities="ROLE_UNTRUSTED"/>
+		<security:user name="admin" password="password" authorities="ROLE_ADMIN"/>
+	</security:user-service>
+
+	<!-- WSDL generation -->
+<!-- generateWSDL -->
+
+	<sws:dynamic-wsdl id="sendGreetingWsdl" portTypeName="SendGreeting" locationUri="http://www.simpliccity.org/schema/sst/test/access/service/SendGreeting">
+		<sws:xsd location="classpath:schema/SendGreeting.xsd" />
+	</sws:dynamic-wsdl>
+	
+<!-- generateWSDL -->
+
+</beans>
+			
