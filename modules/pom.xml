@@ -32,6 +32,8 @@
 	<properties>
 		<!-- Placeholder properties.  These will be overridden either from specific profiles that are enabled or from the command line. -->
 		<jacocoDirectory>${project.build.directory}/external</jacocoDirectory>
+		<maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
   
 	<modules>
